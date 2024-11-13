@@ -13,6 +13,10 @@ APPLICATION_ROOT = "main"
 
 LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
 
+INSERTAPPS = [
+    "mail"
+]
+
 
 # *************邮件配置****************
 MAIL_HOST = "smtp.163.com"
@@ -35,3 +39,10 @@ SITE_CONFIG = {
         "mails": ("2466057319@qq.com",)
     },
 }
+
+
+# *************DB****************
+DB_ENGINE = "tortoise.backends.mysql"
+DB_DATABASE = "test_fap" 
+DB_USERNAME = "root"
+DB_PASSWORD = "root"

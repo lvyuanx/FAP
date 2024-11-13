@@ -107,7 +107,7 @@ def generate_examples(msgs: list[tuple]):
 
 
 
-def loader():
+def loader(*args, **kwargs):
     api_module = f"{APPLIICATION_ROOT}.apis"
 
     # 加载路由配置

@@ -1,5 +1,5 @@
 from ..logging import init_logging
 
-def loader():
+def loader(*args, **kwargs):
     init_logging()
 
