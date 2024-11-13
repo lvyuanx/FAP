@@ -50,8 +50,10 @@ def get_models():
             module = importlib.import_module(model_str)
             if has_model_subclasses(module):
                 models.append(model_str)
+        except ModuleNotFoundError:
+            pass
         except Exception:
-            logger.warn("Failed to import models from %s" % app)
+            logger.error("Failed to import models from %s" % app, exc_info=True)
 
     return models
 
