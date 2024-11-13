@@ -10,6 +10,7 @@ Description: 加载路由
 from collections import defaultdict
 import importlib
 import logging
+from types import ModuleType
 import uuid
 
 from fastapi import FastAPI, APIRouter
@@ -38,6 +39,7 @@ FAP_OPENAPI_URL = getattr(settings, "FAP_OPENAPI_URL", "/openapi.json")
 FAP_DEBUG = getattr(settings, "FAP_DEBUG", False)
 FAP_API_CODE_NUM = getattr(settings, "FAP_API_CODE_NUM", 2)
 FAP_API_EXAMPLE_ADAPTER = getattr(settings, "FAP_API_EXAMPLE", None)
+INSERTAPPS = getattr(settings, "INSERTAPPS", [])
 
 
 logger = logging.getLogger("FastApiPlus")
@@ -106,6 +108,11 @@ def generate_examples(msgs: list[tuple]):
     return example
 
 
+def check_module(module: ModuleType):
+    app_name = module.__name__.split('.')[0]
+    if app_name not in INSERTAPPS:
+        raise RuntimeError(f"{app_name} app is not in INSERTAPPS")
+
 
 def loader(*args, **kwargs):
     api_module = f"{APPLIICATION_ROOT}.apis"
@@ -139,6 +146,7 @@ def loader(*args, **kwargs):
                     api_module = importlib.import_module(amodule_or_str)
                 else:
                     api_module = amodule_or_str
+                check_module(api_module)
                 view_endpoint = api_module.View  # 视图函数
                 api_code = gid + aid
                 examples = generate_examples(status_dict[api_code])

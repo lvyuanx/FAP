@@ -90,7 +90,7 @@ class FastApiPlusApplication(object):
         try:
             for loader in loader_lst:
                 loader_module = importlib.import_module(f"{package}.loaders.{loader}")
-                res = getattr(loader_module, "init_app")(self.app)
+                res = getattr(loader_module, "loader")(self.app)
                 if res and isinstance(res, FastAPI):
                     self.app = res
         except Exception as e:
