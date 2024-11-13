@@ -6,7 +6,15 @@ Author: lvyuanxiang
 Date: 2024/11/13 10:18:18
 Description: 使用mysql数据库
 """
+import importlib
+import inspect
+import logging
+
+from tortoise import Model
+
 from .. import settings
+
+logger = logging.getLogger("FAPlus")
 
 USERNAME = getattr(settings, "DB_USERNAME", "root")
 PASSWORD = getattr(settings, "DB_PASSWORD", "123456")
@@ -22,6 +30,32 @@ GENERATE_SCHEMAS = getattr(settings, "DB_GENERATE_SCHEMAS", False)
 INSERTAPPS = getattr(settings, "INSERTAPPS", [])
 IS_DEBUG  = getattr(settings, "DEBUG", True)
 
+
+def has_model_subclasses(module):
+    """
+    检查模块中是否有 Model 的子类
+    """
+    model_subclasses = [
+        cls for _, cls in inspect.getmembers(module, inspect.isclass)
+        if issubclass(cls, Model) and cls is not Model
+    ]
+    return model_subclasses
+
+def get_models():
+
+    models = []
+    for app in INSERTAPPS:
+        try:
+            model_str = f"{app}.models"
+            module = importlib.import_module(model_str)
+            if has_model_subclasses(module):
+                models.append(model_str)
+        except Exception:
+            logger.warn("Failed to import models from %s" % app)
+
+    return models
+
+    
 
 # Tortoise ORM 配置
 TORTOISE_ORM = {
@@ -43,7 +77,7 @@ TORTOISE_ORM = {
     },
     "apps": {
         "models": {
-            "models": ["aerich.models"] + [f"{app}.models" for app in INSERTAPPS],
+            "models": ["aerich.models"] + get_models(),
             "default_connection": "default",
         }
     },
