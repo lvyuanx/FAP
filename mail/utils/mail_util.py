@@ -4,7 +4,7 @@ import logging
 import smtplib  # smtp服务器
 from email.mime.text import MIMEText
 
-from core.faplus.utils.config_util import settings
+from faplus.utils.config_util import settings
 from mail.const import MailLevelEnum
 
 logger = logging.getLogger("sys")

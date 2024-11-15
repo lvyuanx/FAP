@@ -13,5 +13,5 @@ import os
 
 if __name__ == '__main__':
     os.environ.setdefault("FAP_SETTINGS_MODULE", "main.settings")
-    from core.faplus.applications import FastApiPlusApplication
+    from faplus.applications import FastApiPlusApplication
     FastApiPlusApplication()

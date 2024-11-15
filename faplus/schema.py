@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Union
 
 
 class ResponseSchema(BaseModel):
@@ -7,4 +7,4 @@ class ResponseSchema(BaseModel):
 
     code: str = Field(description="状态码")
     msg: Optional[str] = Field(description="状态信息")
-    data: Optional[dict] = Field(description="返回数据")
+    data: Optional[Union[dict, str]] = Field(description="返回数据")

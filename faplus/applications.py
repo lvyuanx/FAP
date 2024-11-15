@@ -6,11 +6,11 @@ Author: lvyuanxiang
 Date: 2024/11/06 11:48:48
 Description: 程序入口
 """
+import os
 import logging
 import argparse
 import importlib
 import asyncio
-from tortoise import models
 
 import uvicorn
 from fastapi.applications import FastAPI
@@ -24,6 +24,7 @@ class FastApiPlusApplication(object):
     app: FastAPI = None
 
     def __init__(self) -> None:
+        os.environ.setdefault("FAP_PACKAGE", __package__)
         # 初始化logging
         self.get_args()
 

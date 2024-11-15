@@ -4,3 +4,4 @@ uvicorn[standard]~=0.32.0
 tortoise-orm~=0.21.7
 aerich~=0.7.2
 aiomysql~=0.2.0
+cryptography~=43.0.3

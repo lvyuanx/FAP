@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import logging.config
-import inspect
 import os
 
-from core.faplus.utils.config_util import settings
+from faplus.utils.config_util import settings
 
 
 def load_logging_cfg():
@@ -21,16 +20,6 @@ def load_logging_cfg():
     assert logging_cfg is None or isinstance(logging_cfg, dict), \
         "logging_cfg must be a dict, but got {}".format(type(logging_cfg))
 
-    from .log_handler import MultiprocessTimeHandler
-    # 获取类的模块
-    module = inspect.getmodule(MultiprocessTimeHandler)
-    # 获取模块的完整名称
-    module_name = module.__name__
-    # 获取类的名称
-    class_name = MultiprocessTimeHandler.__name__
-    # 拼接完整的模块路径
-    full_handler_path = f"{module_name}.{class_name}"
-
     if not logging_cfg:
         logging_cfg = {
             "version": 1,
@@ -46,7 +35,7 @@ def load_logging_cfg():
             "handlers": {
                 "all": {  # 记录所有日志
                     "level": "DEBUG",
-                    "class": full_handler_path,
+                    "class": "faplus.logging.log_handler.MultiprocessTimeHandler",
                     "file_path": log_dir,
                     "suffix": "%Y-%m-%d-all",
                     "formatter": "detailed",
@@ -55,7 +44,7 @@ def load_logging_cfg():
                 },
                 "project": {  # 记录项目日志
                     "level": "DEBUG",
-                    "class": full_handler_path,
+                    "class": "faplus.logging.log_handler.MultiprocessTimeHandler",
                     "file_path": log_dir,
                     "suffix": "%Y-%m-%d-project",
                     "formatter": "detailed",
@@ -64,7 +53,7 @@ def load_logging_cfg():
                 },
                 "error": {  # 只记录错误日志
                     "level": "ERROR",
-                    "class": full_handler_path,
+                    "class": "faplus.logging.log_handler.MultiprocessTimeHandler",
                     "file_path": log_dir,
                     "suffix": "%Y-%m-%d-error",
                     "formatter": "detailed",
