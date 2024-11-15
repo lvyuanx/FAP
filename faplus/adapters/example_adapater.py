@@ -8,7 +8,7 @@ Description: 接口模板适配器
 """
 
 
-from core.faplus.utils.config_util import StatusCodeEnum
+from faplus.utils.config_util import StatusCodeEnum
 
 
 def success() -> dict:

@@ -1,15 +1,15 @@
-from core.faplus.utils.config_util import StatusCodeEnum
-from core.faplus.schema import ResponseSchema
+from faplus.utils.config_util import StatusCodeEnum
+from faplus.schema import ResponseSchema
 
 
 class Response(object):
 
     @staticmethod
-    def OK(msg: str = None, data: dict = None):
+    def OK(msg: str = None, data: dict | str = None):
         return ResponseSchema(code=StatusCodeEnum.请求成功, msg=msg, data=data)
 
     @staticmethod
-    def FAIL(code: StatusCodeEnum, msg_dict: dict = None, data: dict = None):
+    def FAIL(code: StatusCodeEnum, msg_dict: dict = None, data: dict | str = None):
         msg = code.name
         if msg_dict and isinstance(code.value, tuple):
             code, msg  = code.value
