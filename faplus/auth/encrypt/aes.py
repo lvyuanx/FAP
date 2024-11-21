@@ -1,3 +1,12 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Filename: aes.py
+Author: lvyuanxiang
+Date: 2024/11/15 16:45:00
+Description: AES加密解密,不同加密结果
+"""
+
 import os
 import base64
 
@@ -7,9 +16,9 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.padding import PKCS7
 
-from faplus import settings
+from faplus import settings, dft_settings
 
-FAP_AES_KEY = getattr(settings, "FAP_AES_KEY", None)
+FAP_AES_KEY = getattr(settings, "FAP_AES_KEY", dft_settings.FAP_AES_KEY)
 
 def generate_aes_key(password: str, salt: str = None) -> str:
     """

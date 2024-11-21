@@ -21,6 +21,7 @@ class User(Model):
     email = fields.CharField(max_length=128, null=True, unique=True, description="邮箱")
     mobile = fields.CharField(max_length=32, null=True, unique=True, description="手机号码")
     is_active = fields.BooleanField(default=True, description="是否激活")
+    is_superuser = fields.BooleanField(default=False, description="是否是超级管理员")
     created_at = fields.DatetimeField(auto_now_add=True, description="创建时间")
     updated_at = fields.DatetimeField(auto_now=True, description="更新时间")
     

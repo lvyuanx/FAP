@@ -32,6 +32,7 @@ FAP_SETTINGS_MODULE = os.environ.get("FAP_SETTINGS_MODULE")
 
 settings = ModuleLoader(FAP_SETTINGS_MODULE)  # settings.py 文件的模块名称
 
+dft_settings = ModuleLoader("faplus.default_settings")
 
 def import_status_code_enum():
     try:

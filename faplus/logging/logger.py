@@ -6,6 +6,11 @@ import os
 from faplus.utils.config_util import settings
 
 
+class AiomysqlFilter(logging.Filter):
+    """tortoise.db_client 和 aiomysql重复，需要去除冗余输出"""
+    def filter(self, record):
+        return not record.name.startswith('aiomysql')
+
 def load_logging_cfg():
     log_level = getattr(settings, "LOG_LEVEL", "DEBUG")
     log_dir = getattr(settings, "LOG_DIR", "logs")
@@ -32,6 +37,11 @@ def load_logging_cfg():
                     "format": "[%(asctime)s][%(filename)s:%(lineno)d][%(levelname)s] - %(message)s"
                 },
             },
+            "filters": {
+                "aiomysql_filter": {
+                    "()": f"{__name__}.AiomysqlFilter",
+                },
+            },
             "handlers": {
                 "all": {  # 记录所有日志
                     "level": "DEBUG",
@@ -41,6 +51,7 @@ def load_logging_cfg():
                     "formatter": "detailed",
                     "backup_count": 30,
                     "encoding": "utf-8",
+                    "filters": ["aiomysql_filter"]
                 },
                 "project": {  # 记录项目日志
                     "level": "DEBUG",
@@ -50,6 +61,7 @@ def load_logging_cfg():
                     "formatter": "detailed",
                     "backup_count": 30,
                     "encoding": "utf-8",
+                    "filters": ["aiomysql_filter"]
                 },
                 "error": {  # 只记录错误日志
                     "level": "ERROR",
@@ -59,11 +71,13 @@ def load_logging_cfg():
                     "formatter": "detailed",
                     "backup_count": 30,
                     "encoding": "utf-8",
+                    "filters": ["aiomysql_filter"]
                 },
                 "console": {
                     "level": "DEBUG",
                     "class": "logging.StreamHandler",
                     "formatter": "simple",
+                    "filters": ["aiomysql_filter"]
                 },
             },
             "loggers": {

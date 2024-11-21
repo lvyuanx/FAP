@@ -27,7 +27,7 @@ TIMEZONE = getattr(settings, "DB_TIMEZONE", "Asia/Shanghai")
 MAXSIZE = getattr(settings, "DB_MAXSIZE", 20)
 MINSIZE = getattr(settings, "DB_MINSIZE", 1)
 GENERATE_SCHEMAS = getattr(settings, "DB_GENERATE_SCHEMAS", False)
-INSERTAPPS = getattr(settings, "INSERTAPPS", [])
+INSERTAPPS = getattr(settings, "FAP_INSERTAPPS", [])
 IS_DEBUG  = getattr(settings, "DEBUG", True)
 
 

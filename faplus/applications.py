@@ -10,13 +10,12 @@ import os
 import logging
 import argparse
 import importlib
-import asyncio
 
 import uvicorn
 from fastapi.applications import FastAPI
 
 
-logger = logging.getLogger("FastApiPlus")
+logger = logging.getLogger(__package__)
 
 
 class FastApiPlusApplication(object):
@@ -25,6 +24,7 @@ class FastApiPlusApplication(object):
 
     def __init__(self) -> None:
         os.environ.setdefault("FAP_PACKAGE", __package__)
+        self.args = None
         # 初始化logging
         self.get_args()
 
@@ -55,10 +55,10 @@ class FastApiPlusApplication(object):
         # runserver
         parser_runserver = subparsers.add_parser("runserver", help="启动服务器")
         parser_runserver.add_argument(
-            "--host_port", type=str, default="0.0.0.0:8848", help="指定服务器监听的 host 和 port，格式如 0.0.0.0:8000")
+            "--host_port", type=str, default="127.0.0.1:8848", help="指定服务器监听的 host 和 port，格式如 127.0.0.1:8000")
         parser_runserver.add_argument(
             "--reload", action="store_true", help="是否开启热加载模式")
-        parser_runserver.add_argument("--workers", type=int, help="指定工作进程数")
+        parser_runserver.add_argument("--workers", type=int, default=1, help="指定工作进程数")
         
         # migrations
         subparsers.add_parser("migrations", help="生成数据库迁移文件")
@@ -78,6 +78,7 @@ class FastApiPlusApplication(object):
         
         
         args = parser.parse_args()
+        self.args = args
         self.execute_command(args)
 
     def load(self):
@@ -100,24 +101,35 @@ class FastApiPlusApplication(object):
     
     def event_register(self, app: FastAPI):
         """事件注册"""
-        from . import settings
-        startups: list[str] = getattr(settings, "FAP_STARTUPS", [])
-        shutdowns: list[str] = getattr(settings, "FAP_SHUTDOWNS", [])
+        from . import settings, dft_settings
+        startups: list[str] = getattr(settings, "FAP_STARTUP_MODULES", dft_settings.FAP_STARTUP_MODULES)
+        shutdowns: list[str] = getattr(settings, "FAP_SHUTDOWN_MODULES", dft_settings.FAP_SHUTDOWN_MODULES)
         logger.debug("fast api plus startup -> {startups}")
         logger.debug("fast api plus shutdown -> {shutdowns}")
-        def add_event(event: str, func_path: str):
-            path, func_name = func_path.rsplit(".", 1)
-            module = importlib.import_module(path)
+        def add_event(event: str, module_str: str):
+            module = importlib.import_module(module_str)
+            func_name = f"create_{event}_event"
             func = getattr(module, func_name, None)
-            assert callable(func), f"{func_path} is not callable"
-            assert asyncio.iscoroutinefunction(func), f"{func_path} is not a coroutine function"
-            app.add_event_handler(event, func)
+            assert callable(func), f"{module_str} not has {func_name}"
+            app.add_event_handler(event, func(cmd_args=self.args))
         
         for startup in startups:
             add_event("startup", startup)
         
         for shutdown in shutdowns:
             add_event("shutdown", shutdown)
+    
+    def middleware_register(self, app: FastAPI):
+        """中间件注册"""
+        from . import settings
+        middlewares: list[str] = getattr(settings, "FAP_MIDDLEWARE_CLASSES", [])
+        logger.debug("fast api plus middleware -> {middlewares}")
+        for middleware in middlewares:
+            path, middleware_name = middleware.rsplit(".", 1)
+            module = importlib.import_module(path)
+            middleware_cls = getattr(module, middleware_name, None)
+            assert middleware_cls, f"{middleware} is not found"
+            app.add_middleware(middleware_cls)
 
                               
 
@@ -133,10 +145,13 @@ class FastApiPlusApplication(object):
         # 注册事件
         self.event_register(app)
 
+        # 注册中间件
+        self.middleware_register(app)
+
         # 启动服务
         host, port = command_args.host_port.split(":")
         uvicorn.run(app, host=host, port=int(port),
-                    reload=command_args.reload, workers=command_args.workers)
+                    reload=command_args.reload, workers=command_args.workers, log_level="error")
     
     
     def run_cmd(self, cmd: str):

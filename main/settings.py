@@ -13,13 +13,31 @@ APPLICATION_ROOT = "main"
 
 LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
 
-INSERTAPPS = [
+FAP_INSERTAPPS = [
     "faplus.auth",
     "mail"
 ]
 
-FAP_AES_KEY = "OUBCNUIwmA+W5UmHNm6bkkYZ47QSIRslD/gYAsIGSZg="
+FAP_MIDDLEWARE_CLASSES = [
+    "faplus.middlewares.jwt_middleware.JwtMiddleware",
+    "faplus.middlewares.logging_middleware.LoggingMiddleware",
+]
 
+FAP_STARTUP_MODULES = [
+    "faplus.startups.run_info_startup",
+]
+
+FAP_JWT_WHITES = [
+]
+
+if DEBUG:
+    FAP_JWT_WHITES += [
+        "/debug/user/create"
+    ]
+
+# *************密钥****************
+FAP_AES_KEY = "OUBCNUIwmA+W5UmHNm6bkkYZ47QSIRslD/gYAsIGSZg="
+FAP_AES2_KEY = "abcdefghijklmnopqrstuvwx" # 16 24 或 32 位的密钥
 FAP_PUBLICK_KEY = """-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA30x63JVPdz14KBA/lZvq
 SHhf0v2PHo1h1MqYzLmn9FaTotiIf3Knp02t9qO91heilq4xDmCYiGMukuPLt+Un
@@ -30,7 +48,6 @@ RTWGCR3XmDlPrIUXg1Tc8Ra4y8AqwCuZSovavMylUnwXnMtcUwmHomby++p2jQ8r
 1QIDAQAB
 -----END PUBLIC KEY-----
 """
-
 FAP_PRIVATE_KEY = """-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDfTHrclU93PXgo
 ED+Vm+pIeF/S/Y8ejWHUypjMuaf0VpOi2Ih/cqenTa32o73WF6KWrjEOYJiIYy6S
@@ -90,3 +107,7 @@ DB_ENGINE = "tortoise.backends.mysql"
 DB_DATABASE = "test_fap" 
 DB_USERNAME = "root"
 DB_PASSWORD = "root"
+
+
+# *************AUTH****************
+# FAP_LOGIN_URL = "/login" # 自定义登录视图
