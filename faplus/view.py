@@ -65,10 +65,12 @@ class BaseView:
     
     def __init_subclass__(cls) -> None:
         super().__init_subclass__()
-
-        cls.api = cls._api_wrapper(cls.finally_code)(cls.api)
-
-    
+        
+        # 所有api开头的方法，自动使用_api_wrapper
+        for name, func in cls.__dict__.items():
+            if name.startswith("api"):
+                wrapped_func = cls._api_wrapper(cls.finally_code)(func)
+                setattr(cls, name, wrapped_func)
 
 
 class PostView(BaseView):

@@ -33,6 +33,9 @@ FAP_DESCRIPTION = ""
 # 文档版本
 FAP_VERSION = "0.0.1"
 
+# 开启的版本
+OPEN_VERSION = [""]
+
 # 联系方式
 FAP_CONTACT = {}
 

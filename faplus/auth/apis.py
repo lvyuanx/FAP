@@ -22,25 +22,25 @@ if DEBUG:
     from .views.user import create_user_view, test_view
     
     apis["/debug/user"] = [
-        ("07", "/create", create_user_view, "创建用户",  ["DEBUG"]),
-        ("08", "/test", test_view, "测试",  ["DEBUG"]),
+        ("07", "/create", create_user_view, "创建用户",  {"tags": ["DEBUG"]}),
+        ("08", "/test", test_view, "测试",  {"tags": ["DEBUG"], "version_config": {"": "api", "/v1": "api_v1"}}),
     ]
     
     apis["/debug/rsa"] = [
-        ("00", "/encrypt", rsa_encrypt_view, "RSA加密",  ["DEBUG"]),
-        ("01", "/decrypt", rsa_decrypt_view, "RSA解密",  ["DEBUG"]),
+        ("00", "/encrypt", rsa_encrypt_view, "RSA加密",  {"tags": ["DEBUG"]}),
+        ("01", "/decrypt", rsa_decrypt_view, "RSA解密",  {"tags": ["DEBUG"]}),
     ]
     
     apis["/debug/aes"] = [
-        ("02", "/encrypt", aes_encrypt_view, "AES加密",  ["DEBUG"]),
-        ("03", "/decrypt", aes_decrypt_view, "AES解密",  ["DEBUG"]),
+        ("02", "/encrypt", aes_encrypt_view, "AES加密",  {"tags": ["DEBUG"]}),
+        ("03", "/decrypt", aes_decrypt_view, "AES解密",  {"tags": ["DEBUG"]}),
     ]
     
     apis["/debug/md5"] = [
-        ("04", "/encrypt", md5_encrypt_view, "MD5加密",  ["DEBUG"]),
+        ("04", "/encrypt", md5_encrypt_view, "MD5加密",  {"tags": ["DEBUG"]}),
     ]
     
     apis["/debug/aes2"] = [
-        ("05", "/encrypt", aes2_encrypt_view, "AES2加密",  ["DEBUG"]),
-        ("06", "/decrypt", aes2_decrypt_view, "AES2解密",  ["DEBUG"]),
+        ("05", "/encrypt", aes2_encrypt_view, "AES2加密",  {"tags": ["DEBUG"]}),
+        ("06", "/decrypt", aes2_decrypt_view, "AES2解密",  {"tags": ["DEBUG"]}),
     ]

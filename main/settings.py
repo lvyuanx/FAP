@@ -13,6 +13,8 @@ APPLICATION_ROOT = "main"
 
 LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
 
+OPEN_VERSION = ["", "/v1"]
+
 FAP_INSERTAPPS = [
     "faplus.auth",
     "mail"

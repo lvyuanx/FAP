@@ -15,3 +15,8 @@ class View(PostView):
     @staticmethod
     async def api(authorization: str = Header(None, description="登录token", alias=FAP_TOKEN_TAG)):
         pass
+    
+    
+    @staticmethod
+    async def api_v1():
+        pass

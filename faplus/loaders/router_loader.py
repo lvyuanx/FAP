@@ -47,6 +47,7 @@ FAP_API_EXAMPLE_ADAPTER = getattr(
 FAP_INSERTAPPS = getattr(settings, "FAP_INSERTAPPS",
                          dft_settings.FAP_INSERTAPPS)
 DEBUG = getattr(settings, "DEBUG", dft_settings.DEBUG)
+OPEN_VERSION = getattr(settings, "OPEN_VERSION", dft_settings.OPEN_VERSION) 
 
 
 logger = logging.getLogger(__package__)
@@ -154,9 +155,9 @@ def loader(*args, **kwargs):
             for api_cfg in api_cfgs:
                 if len(api_cfg) == 4:
                     aid, aurl, amodule_or_str, aname = api_cfg
-                    tags = []
+                    kwargs = {}
                 else:
-                    aid, aurl, amodule_or_str, aname, tags = api_cfg
+                    aid, aurl, amodule_or_str, aname, kwargs = api_cfg
                 # 获取接口模块
                 if isinstance(amodule_or_str, str):
                     api_module = importlib.import_module(amodule_or_str)
@@ -168,27 +169,53 @@ def loader(*args, **kwargs):
                 api_code = str(gid) + str(aid)
                 examples = generate_examples(
                     status_dict[api_code], append_codes)
-                # API 配置
-                api_cfg = {
-                    "path": pre_url+aurl,
-                    "name": f"{aname}  {api_code}",
-                    "response_model": view_endpoint.response_model,
-                    "methods": view_endpoint.methods,
-                    "operation_id": f"{api_code}_{api_module.__name__}_{uuid.uuid4().hex}",
-                    "responses": {
-                        200: {
-                            "description": "Success",
-                            "content": {
-                                "application/json": {
-                                    "example": examples
+                version_config = kwargs.get("version_config", None)
+                if version_config:
+                    for k, v in version_config.items(): # k: version url v: 接口
+                        if k not in OPEN_VERSION:
+                            continue
+                        api_cfg = {
+                            "path": pre_url + k +aurl,
+                            "name": f"{aname}  {api_code}",
+                            "response_model": view_endpoint.response_model,
+                            "methods": view_endpoint.methods,
+                            "operation_id": f"{api_code}_{api_module.__name__}_{uuid.uuid4().hex}",
+                            "responses": {
+                                200: {
+                                    "description": "Success",
+                                    "content": {
+                                        "application/json": {
+                                            "example": examples
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        # 动态添加 API 路由，直接使用子类的 `api` 方法
+                        api_group.add_api_route(endpoint=getattr(view_endpoint, v), **api_cfg, tags=[
+                            gtag] + kwargs.get("tags", []))
+                else:
+                    # 未配置版本
+                    api_cfg = {
+                        "path": pre_url+aurl,
+                        "name": f"{aname}  {api_code}",
+                        "response_model": view_endpoint.response_model,
+                        "methods": view_endpoint.methods,
+                        "operation_id": f"{api_code}_{api_module.__name__}_{uuid.uuid4().hex}",
+                        "responses": {
+                            200: {
+                                "description": "Success",
+                                "content": {
+                                    "application/json": {
+                                        "example": examples
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                # 动态添加 API 路由，直接使用子类的 `api` 方法
-                api_group.add_api_route(endpoint=view_endpoint.api, **api_cfg, tags=[
-                    gtag] + tags)
+                    # 动态添加 API 路由，直接使用子类的 `api` 方法
+                    api_group.add_api_route(endpoint=view_endpoint.api, **api_cfg, tags=[
+                        gtag] + kwargs.get("tags", []))
 
         app.include_router(router=api_group, prefix=gurl)
 
