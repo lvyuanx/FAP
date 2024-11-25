@@ -3,7 +3,7 @@
 from enum import Enum
 
 
-class StatusCodeEnum(Enum):
+class ComonStatusCodeEnum(Enum):
     
     # ###################通用代码段 99~90###################
     # 登录99

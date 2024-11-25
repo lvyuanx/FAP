@@ -12,23 +12,23 @@ import logging
 
 from tortoise import Model
 
-from .. import settings
+from .. import settings, dft_settings
 
 logger = logging.getLogger("FAPlus")
 
-USERNAME = getattr(settings, "DB_USERNAME", "root")
-PASSWORD = getattr(settings, "DB_PASSWORD", "123456")
-HOST = getattr(settings, "DB_HOST", "localhost")
-PORT = getattr(settings, "DB_PORT", 3306)
-DATABASE = getattr(settings, "DB_DATABASE", None)
-ENGINE = getattr(settings, "DB_ENGINE", None)
-CHARSET = getattr(settings, "DB_CHARSET", "utf8mb4")
-TIMEZONE = getattr(settings, "DB_TIMEZONE", "Asia/Shanghai")
-MAXSIZE = getattr(settings, "DB_MAXSIZE", 20)
-MINSIZE = getattr(settings, "DB_MINSIZE", 1)
-GENERATE_SCHEMAS = getattr(settings, "DB_GENERATE_SCHEMAS", False)
-INSERTAPPS = getattr(settings, "FAP_INSERTAPPS", [])
-IS_DEBUG  = getattr(settings, "DEBUG", True)
+USERNAME = getattr(settings, "DB_USERNAME", dft_settings.DB_USERNAME)
+PASSWORD = getattr(settings, "DB_PASSWORD", dft_settings.DB_PASSWORD)
+HOST = getattr(settings, "DB_HOST", dft_settings.DB_HOST)
+PORT = getattr(settings, "DB_PORT", dft_settings.DB_PORT)
+DATABASE = getattr(settings, "DB_DATABASE", dft_settings.DB_DATABASE)
+ENGINE = getattr(settings, "DB_ENGINE", dft_settings.DB_ENGINE)
+CHARSET = getattr(settings, "DB_CHARSET", dft_settings.DB_CHARSET)
+TIMEZONE = getattr(settings, "DB_TIMEZONE", dft_settings.DB_TIMEZONE)
+MAXSIZE = getattr(settings, "DB_MAXSIZE", dft_settings.DB_MAXSIZE)
+MINSIZE = getattr(settings, "DB_MINSIZE", dft_settings.DB_MINSIZE)
+GENERATE_SCHEMAS = getattr(settings, "DB_GENERATE_SCHEMAS", dft_settings.DB_GENERATE_SCHEMAS)
+INSERTAPPS = getattr(settings, "FAP_INSERTAPPS", dft_settings.FAP_INSERTAPPS)
+DEBUG  = getattr(settings, "DEBUG", dft_settings.DEBUG)
 
 
 def has_model_subclasses(module):

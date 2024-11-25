@@ -33,7 +33,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 logger.error(f"Response: {status_code}")
                 if status_code in status_code_dict:
                     code = status_code_dict[status_code]
-                    return Response(ApiResponse.FAIL(code).json(), headers={"Content-Type": "application/json"})
+                    return Response(ApiResponse.fail(code).json(), headers={"Content-Type": "application/json"})
                 return res
         except Exception as e:
             logger.error("An error occurred during request processing", exc_info=True)

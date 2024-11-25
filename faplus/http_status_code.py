@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class StatusCodeEnum(Enum):
+class CommonStatusCodeEnum(Enum):
     
     请求成功 = "0"
     请求失败 = "1"

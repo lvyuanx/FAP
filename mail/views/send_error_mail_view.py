@@ -1,4 +1,5 @@
 import logging
+from os import stat
 
 from fastapi import Body
 
@@ -19,23 +20,22 @@ logger = logging.getLogger("sys")
 
 
 class View(PostView):
-    
-    finally_code = StatusCodeEnum.发送文本邮件失败
 
-    
-    
+    finally_code = ("00", "发送错误邮件失败")
+
+    status_codes = [
+        ("01", "站点{name}配置不存在"),
+        ("02", "站点{name}邮件地址未配置"),
+    ]
+
     @staticmethod
     async def api(data: SendErrorMailReqSchema = Body(..., description="错误邮件请求的数据"),):
         """发送错误栈邮件"""
         if data.site_name not in SITE_CONFIG:
-            return Response.FAIL(
-                StatusCodeEnum.站点配置不存在, msg_dict={"name": data.site_name}
-            )
+            return View.make_code("01", msg_dict={"name": data.site_name})
         to_users = SITE_CONFIG[data.site_name].get("mails", [])
         if len(to_users) < 1:
-            return Response.FAIL(
-                StatusCodeEnum.站点邮件地址未配置, msg_dict={"name": data.site_name}
-            )
+            return View.make_code("02", msg_dict={"name": data.site_name})
         send_data = {
             "to_user": ",".join(to_users),
             "from_user": MAIL_USER,
@@ -44,4 +44,3 @@ class View(PostView):
             "level": data.level,
         }
         mail_util.send_text_mail(**send_data)
-

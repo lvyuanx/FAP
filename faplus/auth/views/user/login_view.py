@@ -10,22 +10,26 @@ from fastapi import Body, Request
 
 from faplus import StatusCodeEnum, Response
 from faplus.view import PostView
-from faplus.auth.schemas import LoginReqSchema, UserSchema
+from faplus.auth.schemas import LoginReqSchema, UserSchema, LoginResSchema
 from faplus.auth.utils import user_util
 from faplus.utils import token_util, crypto_util
 
 class View(PostView):
     
+    response_model = LoginResSchema
     finally_code = StatusCodeEnum.登录失败
-    append_codes = [
-        StatusCodeEnum.登录失败,
+    common_codes = [
+        StatusCodeEnum.用户名或密码错误
     ]
-    
+
     @staticmethod
     async def api(request: Request, data: LoginReqSchema = Body(description="登录参数")):
+        """
+        data: LoginReqSchema
+        """
         user = await user_util.authenticate_user(data.username, data.password)
         if not user:
-            return Response.FAIL(StatusCodeEnum.用户名或密码错误)
+            return View.make_code(StatusCodeEnum.用户名或密码错误)
         
         # 创建token
         payload = {"user_id": user.id}

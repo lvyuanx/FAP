@@ -17,10 +17,12 @@ from faplus.auth.utils import user_util
 class View(PostView):
 
     finally_code = StatusCodeEnum.用户创建失败
-    append_codes = [
-        StatusCodeEnum.用户创建失败,
-    ]
 
     @staticmethod
     async def api(request: Request, data: CreateUserReqSchema = Body(description="用户数据")):
+        """
+        创建用户
+        
+        **注意**：该接口仅仅用于测试环境快速生成用户，生产环境请自行编写用户创建方法
+        """
         await user_util.create_user(**data.dict())

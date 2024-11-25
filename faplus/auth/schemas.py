@@ -1,7 +1,11 @@
 from pydantic import Field, BaseModel
 from datetime import datetime
 
+from faplus.schema import ResponseSchema
+
+
 class UserSchema(BaseModel):
+    """用户模型schema"""
     id: int
     username: str
     password: str
@@ -22,7 +26,17 @@ class LoginReqSchema(BaseModel):
 
     username: str = Field(description="用户名")
     password: str = Field(description="密码")
-    
+
+
+class _LoginResSchema(BaseModel):
+    """登录响应参数"""
+    token: str = Field(description="token")
+
+
+class LoginResSchema(ResponseSchema):
+    data: _LoginResSchema | None
+
+
 class CreateUserReqSchema(BaseModel):
     """创建用户请求参数"""
 

@@ -4,13 +4,25 @@ from faplus.schema import ResponseSchema
 
 class Response(object):
     @staticmethod
-    def OK(msg: str = None, data: dict | str = None) -> ResponseSchema:
+    def ok(msg: str = None, data: dict | str = None) -> ResponseSchema:
         return ResponseSchema(code=StatusCodeEnum.请求成功, msg=msg, data=data)
 
     @staticmethod
     def FAIL(code: StatusCodeEnum, msg_dict: dict = None, data: dict | str = None) -> ResponseSchema:
         msg = code.name
         if msg_dict and isinstance(code.value, tuple):
-            code, msg  = code.value
+            code, msg = code.value
             msg = msg.format(**msg_dict)
         return ResponseSchema(code=code, msg=msg, data=data)
+    
+    @staticmethod
+    def exception(code: StatusCodeEnum, msg_dict: dict = None, data: dict | str = None) -> ResponseSchema:
+        msg = code.name
+        if msg_dict and isinstance(code.value, tuple):
+            code, msg = code.value
+            msg = msg.format(**msg_dict)
+        return ResponseSchema(code=code, msg=msg, data=data)
+
+    @staticmethod
+    def fail(code: str, msg: str):
+        return ResponseSchema(code=code, msg=msg, data=None)

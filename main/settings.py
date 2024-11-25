@@ -28,13 +28,17 @@ FAP_MIDDLEWARE_CLASSES = [
 FAP_STARTUP_MODULES = [
     "faplus.startups.run_info_startup",
 ]
+FAP_SHUTDOWN_MODULES = [
+    "faplus.shutdowns.close_info_shutdowns",
+]
 
 FAP_JWT_WHITES = [
 ]
 
 if DEBUG:
     FAP_JWT_WHITES += [
-        "/debug/user/create"
+        "/debug/user/create",
+        "/debug/user/test"
     ]
 
 # *************密钥****************

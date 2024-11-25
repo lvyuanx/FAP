@@ -89,3 +89,19 @@ FAP_STARTUP_MODULES = []
 
 # 关机自动触发的模块
 FAP_SHUTDOWN_MODULES = []
+
+
+## 数据库相关
+DB_USERNAME = "root"
+DB_PASSWORD = "123456"
+DB_HOST = "localhost"
+DB_PORT = 3306
+DB_DATABASE = None
+DB_ENGINE = None
+DB_CHARSET = "utf8mb4"
+DB_TIMEZONE = "Asia/Shanghai"
+DB_MAXSIZE = 20
+DB_MINSIZE = 1
+DB_GENERATE_SCHEMAS = False
+DB_INSERTAPPS = []
+DB_DEBUG  = True

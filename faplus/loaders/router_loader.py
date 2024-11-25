@@ -8,14 +8,18 @@ Description: 加载路由
 """
 
 from collections import defaultdict
+from enum import Enum
 import importlib
 import logging
 from types import ModuleType
+from typing import Union
 import uuid
 
 from fastapi import FastAPI, APIRouter
 from fastapi.staticfiles import StaticFiles
-from faplus.utils.config_util import settings, StatusCodeEnum, dft_settings
+from pydantic.main import BaseModel
+from faplus import settings, StatusCodeEnum, dft_settings
+from faplus.utils import data_util
 from fastapi.openapi.docs import (
     get_redoc_html,
     get_swagger_ui_html,
@@ -47,7 +51,7 @@ FAP_API_EXAMPLE_ADAPTER = getattr(
 FAP_INSERTAPPS = getattr(settings, "FAP_INSERTAPPS",
                          dft_settings.FAP_INSERTAPPS)
 DEBUG = getattr(settings, "DEBUG", dft_settings.DEBUG)
-OPEN_VERSION = getattr(settings, "OPEN_VERSION", dft_settings.OPEN_VERSION) 
+OPEN_VERSION = getattr(settings, "OPEN_VERSION", dft_settings.OPEN_VERSION)
 
 
 logger = logging.getLogger(__package__)
@@ -98,7 +102,13 @@ def init_app() -> FastAPI:
     return app
 
 
-def generate_examples(msgs: list[tuple], append_codes: list[StatusCodeEnum]):
+def generate_responses(
+    api_code: str,
+    status_codes: list[tuple[str, str]],
+    common_codes: list[Enum],
+    finally_code: Enum | tuple[str, str],
+    response_model: type[BaseModel],
+):
     """生成结果示例
 
     :param msgs: (状态码，描述)
@@ -108,22 +118,77 @@ def generate_examples(msgs: list[tuple], append_codes: list[StatusCodeEnum]):
         adapter = importlib.import_module(FAP_API_EXAMPLE_ADAPTER)
     else:
         from ..adapters import example_adapater as adapter
-    example = []
-    success_example = adapter.success()
-    example.append(success_example)
-    for code, msg in msgs:
-        error_example = adapter.error(code, msg)
-        example.append(error_example)
-    for code in append_codes:
-        error_example = adapter.error(code.value, code.name)
-        example.append(error_example)
-    return example
+    example = {}
+    # success
+    example[200] = {
+        "description": "请求成功",
+        "content": {
+            "application/json": {
+                "example": data_util.generate_example(response_model)
+            }
+        }
+    }
+
+    # error
+    code_dict = {}
+    for code, msg in status_codes:
+        code = f"{api_code}{code}"
+        example[int(code)] = {
+            "description": msg,
+            "content": {
+                "application/json": {
+                    "example": adapter.error(code, msg)
+                }
+            }
+        }
+        code_dict[code] = msg
+    for code_enum in common_codes:
+        code, msg = code_enum.value, code_enum.name
+        example[int(code)] = {
+            "description": msg,
+            "content": {
+                "application/json": {
+                    "example": adapter.error(code, msg)
+                }
+            }
+        }
+        code_dict[code] = msg
+        
+    if finally_code:
+        if isinstance(finally_code, Enum) and finally_code.value not in code_dict:
+            code, msg = finally_code.value, finally_code.name
+            example[int(code)] = {
+                "description": msg,
+                "content": {
+                    "application/json": {
+                        "example": adapter.error(code, msg)
+                    }
+                }
+            }
+
+            code_dict[code] = msg
+            
+        if isinstance(finally_code, tuple) and f"{api_code}{finally_code[0]}" not in code_dict:
+            code, msg = finally_code
+            code = f"{api_code}{code}"
+            example[int(code)] = {
+                "description": msg,
+                "content": {
+                    "application/json": {
+                        "example": adapter.error(code, msg)
+                    }
+                }
+            }
+            code_dict[code] = msg
+
+    return example, code_dict
 
 
-def check_module(module: ModuleType):
+def check_app(module: ModuleType):
     app_name = module.__name__.split('.views.', 1)[0]
     if app_name not in FAP_INSERTAPPS:
         raise RuntimeError(f"{app_name} app is not in FAP_INSERTAPPS")
+    return app_name
 
 
 def loader(*args, **kwargs):
@@ -135,17 +200,6 @@ def loader(*args, **kwargs):
 
     # 初始化app
     app = init_app()
-
-    status_dict = defaultdict(list)
-    pre_len = int(FAP_API_CODE_NUM) * 2  # 接口码长度
-    for name, value in StatusCodeEnum.__members__.items():  # 遍历状态码
-        code = value.value
-        if isinstance(code, str):  # 状态码为字符串
-            status_dict[code if len(code) < pre_len else code[:pre_len]].append(
-                (code, name))
-        else:
-            code, desc = code
-            status_dict[code[:pre_len]].append({code, desc})
 
     # 遍历路由组
     for gid, gurl, groups, gtag in api_cfg:
@@ -163,33 +217,34 @@ def loader(*args, **kwargs):
                     api_module = importlib.import_module(amodule_or_str)
                 else:
                     api_module = amodule_or_str
-                check_module(api_module)
+                check_app(api_module)
                 view_endpoint = api_module.View  # 视图函数
-                append_codes = view_endpoint.append_codes
+                status_codes = view_endpoint.status_codes
+                common_codes = view_endpoint.common_codes
+                finally_code = view_endpoint.finally_code
+                response_model = view_endpoint.response_model
                 api_code = str(gid) + str(aid)
-                examples = generate_examples(
-                    status_dict[api_code], append_codes)
+                responses, code_dict = generate_responses(
+                    api_code=api_code,
+                    status_codes=status_codes,
+                    common_codes=common_codes,
+                    finally_code=finally_code,
+                    response_model=response_model
+                )
+                api_module.View.api_code = api_code
+                api_module.View.code_dict = code_dict
                 version_config = kwargs.get("version_config", None)
                 if version_config:
-                    for k, v in version_config.items(): # k: version url v: 接口
+                    for k, v in version_config.items():  # k: version url v: 接口
                         if k not in OPEN_VERSION:
                             continue
                         api_cfg = {
-                            "path": pre_url + k +aurl,
+                            "path": pre_url + k + aurl,
                             "name": f"{aname}  {api_code}",
                             "response_model": view_endpoint.response_model,
                             "methods": view_endpoint.methods,
                             "operation_id": f"{api_code}_{api_module.__name__}_{uuid.uuid4().hex}",
-                            "responses": {
-                                200: {
-                                    "description": "Success",
-                                    "content": {
-                                        "application/json": {
-                                            "example": examples
-                                        }
-                                    }
-                                }
-                            }
+                            "responses": responses,
                         }
                         # 动态添加 API 路由，直接使用子类的 `api` 方法
                         api_group.add_api_route(endpoint=getattr(view_endpoint, v), **api_cfg, tags=[
@@ -202,16 +257,7 @@ def loader(*args, **kwargs):
                         "response_model": view_endpoint.response_model,
                         "methods": view_endpoint.methods,
                         "operation_id": f"{api_code}_{api_module.__name__}_{uuid.uuid4().hex}",
-                        "responses": {
-                            200: {
-                                "description": "Success",
-                                "content": {
-                                    "application/json": {
-                                        "example": examples
-                                    }
-                                }
-                            }
-                        }
+                        "responses": responses
                     }
                     # 动态添加 API 路由，直接使用子类的 `api` 方法
                     api_group.add_api_route(endpoint=view_endpoint.api, **api_cfg, tags=[

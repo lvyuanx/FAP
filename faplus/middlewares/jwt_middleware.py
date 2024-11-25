@@ -38,12 +38,12 @@ class JwtMiddleware(BaseHTTPMiddleware):
             payload = token_util.verify_token(token)
             if not payload:
                 logger.error("token验证失败")
-                return Response(ApiResponse.FAIL(StatusCodeEnum.用户未登录).json(), headers={"Content-Type": "application/json"})
+                return Response(ApiResponse.fail(StatusCodeEnum.用户未登录).json(), headers={"Content-Type": "application/json"})
             
             user = await User.filter(id=payload.get("user_id")).first()
             if not user:
                 logger.error("TOKEN无效")
-                return Response(ApiResponse.FAIL(StatusCodeEnum.TOKEN无效).json(), headers={"Content-Type": "application/json"})
+                return Response(ApiResponse.fail(StatusCodeEnum.TOKEN无效).json(), headers={"Content-Type": "application/json"})
             request.state.user = user
         
         return await call_next(request)

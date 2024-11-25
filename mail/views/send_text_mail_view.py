@@ -6,9 +6,9 @@ from mail.utils import mail_util
 
 
 class View(PostView):
-    
-    finally_code = StatusCodeEnum.发送文本邮件失败
-    
+
+    finally_code = ("00", "发送文本邮件失败")
+
     @staticmethod
     async def api(data: SendTextMailReqSchema):
         mail_util.send_text_mail(
@@ -18,7 +18,3 @@ class View(PostView):
             message=data.msg,
             level=data.level,
         )
-
-    
-    
-    
