@@ -16,7 +16,7 @@ SITE_CONFIG = settings.SITE_CONFIG
 MAIL_USER = settings.MAIL_USER
 
 
-logger = logging.getLogger("sys")
+logger = logging.getLogger(__package__)
 
 
 class View(PostView):

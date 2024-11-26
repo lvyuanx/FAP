@@ -17,7 +17,7 @@ from faplus import StatusCodeEnum
 
 FAP_TOKEN_TAG = getattr(settings, "FAP_TOKEN_TAG", dft_settings.FAP_TOKEN_TAG)
 
-logger = logging.getLogger("sys")
+logger = logging.getLogger(__package__)
 
 
 class ErrorInfo:

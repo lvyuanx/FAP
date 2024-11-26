@@ -3,7 +3,7 @@
 import logging.config
 import os
 
-from faplus.utils.config_util import settings
+from faplus import settings, dft_settings
 
 
 class AiomysqlFilter(logging.Filter):
@@ -11,16 +11,23 @@ class AiomysqlFilter(logging.Filter):
     def filter(self, record):
         return not record.name.startswith('aiomysql')
 
+class ProjectFilter(logging.Filter):
+    """tortoise.db_client 和 aiomysql重复，需要去除冗余输出"""
+    PROJECT_APP_PACKAGES = getattr(settings, "PROJECT_APP_PACKAGES", dft_settings.PROJECT_APP_PACKAGES)
+    def filter(self, record):
+        # 只允许PROJECT_APP_PACKAGES的包前置缀，否则不输出
+        name = record.name
+        return self.PROJECT_APP_PACKAGES and any(name.startswith(pkg) for pkg in self.PROJECT_APP_PACKAGES)
+
 def load_logging_cfg():
-    log_level = getattr(settings, "LOG_LEVEL", "DEBUG")
-    log_dir = getattr(settings, "LOG_DIR", "logs")
-    logging_cfg = getattr(settings, "LOGGING", None)
+    log_level = getattr(settings, "LOG_LEVEL", dft_settings.LOG_LEVEL)
+    log_dir = getattr(settings, "LOG_DIR", dft_settings.LOG_DIR)
+    logging_cfg = getattr(settings, "LOGGING", dft_settings.LOGGING)
     
     assert log_level.upper() in ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"), \
         f"logger level mast be DEBUG, INFO, WARNING, ERROR, CRITICAL, but got {log_level}"
     
-    assert log_dir and os.path.isdir(log_dir), \
-        f"log_dir must be a valid directory path, but got {log_dir}"
+    assert log_dir, f"log_dir is None"
         
     assert logging_cfg is None or isinstance(logging_cfg, dict), \
         "logging_cfg must be a dict, but got {}".format(type(logging_cfg))
@@ -40,6 +47,9 @@ def load_logging_cfg():
             "filters": {
                 "aiomysql_filter": {
                     "()": f"{__name__}.AiomysqlFilter",
+                },
+                "project_filter": {
+                    "()": f"{__name__}.ProjectFilter",
                 },
             },
             "handlers": {
@@ -61,7 +71,7 @@ def load_logging_cfg():
                     "formatter": "detailed",
                     "backup_count": 30,
                     "encoding": "utf-8",
-                    "filters": ["aiomysql_filter"]
+                    "filters": ["aiomysql_filter", "project_filter"]
                 },
                 "error": {  # 只记录错误日志
                     "level": "ERROR",
@@ -82,11 +92,10 @@ def load_logging_cfg():
             },
             "loggers": {
                 "": {
-                    "handlers": ["all", "console", "error"],
+                    "handlers": ["all", "console", "error", "project"],
                     "level": log_level,
                     "propagate": True,
-                },
-                "sys": {"handlers": ["project"], "level": log_level},
+                }
             },
         }
     

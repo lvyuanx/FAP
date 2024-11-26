@@ -13,27 +13,23 @@ APPLICATION_ROOT = "main"
 
 LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
 
-OPEN_VERSION = ["", "/v1"]
-
-FAP_INSERTAPPS = [
-    "faplus.auth",
-    "mail"
-]
+OPEN_VERSION = ["", "/v1"] # 开启的版本， "": 默认版本
 
 FAP_MIDDLEWARE_CLASSES = [
     "faplus.middlewares.jwt_middleware.JwtMiddleware",
     "faplus.middlewares.logging_middleware.LoggingMiddleware",
-]
+]  # 中间件
 
 FAP_STARTUP_MODULES = [
     "faplus.startups.run_info_startup",
-]
+]  # 开机自启
+
 FAP_SHUTDOWN_MODULES = [
     "faplus.shutdowns.close_info_shutdowns",
-]
+]  # 关机自启
 
 FAP_JWT_WHITES = [
-]
+]  # 白名单
 
 if DEBUG:
     FAP_JWT_WHITES += [
@@ -41,9 +37,15 @@ if DEBUG:
         "/debug/user/test"
     ]
 
+PROJECT_APP_PACKAGES = ["mail"]  # 项目APP包
+
+FAP_INSERTAPPS = [
+    "faplus.auth"
+] + PROJECT_APP_PACKAGES  # 注册的应用 框架app包+项目app包
+
 # *************密钥****************
 FAP_AES_KEY = "OUBCNUIwmA+W5UmHNm6bkkYZ47QSIRslD/gYAsIGSZg="
-FAP_AES2_KEY = "abcdefghijklmnopqrstuvwx" # 16 24 或 32 位的密钥
+FAP_AES2_KEY = "abcdefghijklmnopqrstuvwx"  # 16 24 或 32 位的密钥
 FAP_PUBLICK_KEY = """-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA30x63JVPdz14KBA/lZvq
 SHhf0v2PHo1h1MqYzLmn9FaTotiIf3Knp02t9qO91heilq4xDmCYiGMukuPLt+Un
@@ -92,7 +94,6 @@ MAIL_USER = "testlv@163.com"
 MAIL_PASSWORD = "LDdCSNqAsMPLRRSq"
 
 
-
 # *************站点配置****************
 SITE_CONFIG = {
     "open_shengfy": {
@@ -110,10 +111,13 @@ SITE_CONFIG = {
 
 # *************DB****************
 DB_ENGINE = "tortoise.backends.mysql"
-DB_DATABASE = "test_fap" 
+DB_DATABASE = "test_fap"
 DB_USERNAME = "root"
 DB_PASSWORD = "root"
 
 
 # *************AUTH****************
 # FAP_LOGIN_URL = "/login" # 自定义登录视图
+
+
+# *************LOGGIN****************

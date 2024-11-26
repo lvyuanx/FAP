@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from faplus.utils.config_util import settings
 from mail.const import MailLevelEnum
 
-logger = logging.getLogger("sys")
+logger = logging.getLogger(__package__)
 
 MAIL_HOST = settings.MAIL_HOST
 MAIL_PORT = settings.MAIL_PORT
