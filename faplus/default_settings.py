@@ -91,7 +91,7 @@ FAP_STARTUP_MODULES = []
 FAP_SHUTDOWN_MODULES = []
 
 
-## 数据库相关
+# 数据库相关
 DB_USERNAME = "root"
 DB_PASSWORD = "123456"
 DB_HOST = "localhost"
@@ -104,10 +104,17 @@ DB_MAXSIZE = 20
 DB_MINSIZE = 1
 DB_GENERATE_SCHEMAS = False
 DB_INSERTAPPS = []
-DB_DEBUG  = True
+DB_DEBUG = True
 
 # 日志相关
 PROJECT_APP_PACKAGES = []
 LOG_LEVEL = "DEBUG"
 LOG_DIR = "logs"
 LOGGING = None
+
+# 缓存相关
+FAP_CACHE_CONFIG = {
+    "default": {
+        "BACKEND": "faplus.cache.backends.menory_cache.MemoryCache",
+    }
+}

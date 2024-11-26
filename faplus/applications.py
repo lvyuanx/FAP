@@ -88,6 +88,7 @@ class FastApiPlusApplication(object):
             "logging_loader",
             "router_loader",
             "tortoise_loader",
+            "cache_loader",
         ]
         try:
             for loader in loader_lst:
@@ -104,8 +105,6 @@ class FastApiPlusApplication(object):
         from . import settings, dft_settings
         startups: list[str] = getattr(settings, "FAP_STARTUP_MODULES", dft_settings.FAP_STARTUP_MODULES)
         shutdowns: list[str] = getattr(settings, "FAP_SHUTDOWN_MODULES", dft_settings.FAP_SHUTDOWN_MODULES)
-        logger.debug("fast api plus startup -> {startups}")
-        logger.debug("fast api plus shutdown -> {shutdowns}")
         def add_event(event: str, module_str: str):
             module = importlib.import_module(module_str)
             func_name = f"create_{event}_event"
@@ -123,7 +122,6 @@ class FastApiPlusApplication(object):
         """中间件注册"""
         from . import settings
         middlewares: list[str] = getattr(settings, "FAP_MIDDLEWARE_CLASSES", [])
-        logger.debug("fast api plus middleware -> {middlewares}")
         for middleware in middlewares:
             path, middleware_name = middleware.rsplit(".", 1)
             module = importlib.import_module(path)

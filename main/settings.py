@@ -13,7 +13,7 @@ APPLICATION_ROOT = "main"
 
 LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
 
-OPEN_VERSION = ["", "/v1"] # 开启的版本， "": 默认版本
+OPEN_VERSION = ["", "/v1"]  # 开启的版本， "": 默认版本
 
 FAP_MIDDLEWARE_CLASSES = [
     "faplus.middlewares.jwt_middleware.JwtMiddleware",
@@ -22,6 +22,7 @@ FAP_MIDDLEWARE_CLASSES = [
 
 FAP_STARTUP_MODULES = [
     "faplus.startups.run_info_startup",
+    "faplus.cache.startups.check_cache_startup"
 ]  # 开机自启
 
 FAP_SHUTDOWN_MODULES = [
@@ -120,4 +121,18 @@ DB_PASSWORD = "root"
 # FAP_LOGIN_URL = "/login" # 自定义登录视图
 
 
-# *************LOGGIN****************
+# *************CACHE****************
+# FAP_CACHE_CONFIG = {
+#     "default": {
+#         "BACKEND": "faplus.cache.backends.redis_cache.RedisCache",
+#         "PREFIX": "faplus.",
+#         "OPTIONS": {
+#             "HOST": "127.0.0.1",
+#             "PORT": 6379,
+#             "DB": 0,
+#             "PASSWORD": "",
+#             "MAX_CONNECTIONS": 50,
+#             "ENCODING": "utf-8",
+#         }
+#     }
+# }
