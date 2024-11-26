@@ -4,7 +4,7 @@
 Filename: http_status_code.py
 Author: lvyuanxiang
 Date: 2024/11/25 16:11:13
-Description: 全局通用异常码枚举
+Description: 全局通用异常码枚举(接口的异常码，请在接口内定义，并使用make_code方法返回。)
 """
 
 from enum import Enum

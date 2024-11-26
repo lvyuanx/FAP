@@ -13,7 +13,7 @@ import functools
 from faplus import FAPStatusCodeException, settings, dft_settings
 from faplus.schema import ResponseSchema
 from faplus.utils.api_util import Response
-from faplus.utils.config_util import StatusCodeEnum
+from faplus import StatusCodeEnum
 
 FAP_TOKEN_TAG = getattr(settings, "FAP_TOKEN_TAG", dft_settings.FAP_TOKEN_TAG)
 
@@ -34,14 +34,17 @@ class ErrorInfo:
 
 
 class BaseView:
-    methods = ["POST"]
-    api_code = None
-    response_model = ResponseSchema
-    finally_code = None  # 最终异常码
-    status_codes = []  # 状态码
-    common_codes = []  # 通用状态码
+    """所有视图接口的基类"""
 
-    code_dict = {}
+    methods = ["POST"]  # 接口请求类型
+    api_code = None  # api code码，请勿自行修改，初始化的时候，系统会自动赋值
+    code_dict = {}  # 所有改接口使用到的异常码的字典，初始化的时候，系统会自动赋值
+
+    response_model = ResponseSchema
+    common_codes = []  # 通用状态码，使用
+    # 最终异常码，可以使用StatusCodeEnum枚举中定义的通用状态码枚举，或者接口异常状态码(<code>, <msg>)
+    finally_code = None
+    status_codes = []  # 接口异常状态码(<code>, <msg>)
 
     @classmethod
     def make_code(cls, code: str | StatusCodeEnum, msg_dict: dict = None) -> ErrorInfo:
@@ -67,39 +70,44 @@ class BaseView:
         """抽象方法，需在子类中实现"""
         raise NotImplementedError("Subclasses should implement this method")
 
-    @staticmethod
-    def _api_wrapper(code: StatusCodeEnum | None):
-        """api wrapper with parameters"""
+    @classmethod
+    def _api_wrapper(cls, code: StatusCodeEnum | tuple[str, str] = None):
+        """api装饰器，能够帮助处理异常，以及返回值的处理"""
         def decorator(func):
             @functools.wraps(func)
             async def wrapper(*args, **kwargs):
                 """wrapper"""
                 try:
                     result = await func(*args, **kwargs)
-                    if isinstance(result, ErrorInfo):
+                    if isinstance(result, ErrorInfo):  # 返回了异常影响
                         msg_dict = result.msg_dict
                         msg = result.msg
                         if msg_dict:
                             msg = msg.format(**msg_dict)
                         result = Response.fail(code=result.code, msg=msg)
-                        logger.error(f"result: {result}")
-                    else:
+                        logger.error(f"[ErrorInfo] result: {result}")
+                    else:  # 正常返回
                         result = Response.ok(data=result)
                         logger.debug(f"result: {result}")
                     return result
-                except FAPStatusCodeException as e:
-                    result = Response.exception(
-                        code=e.code, msg_dict=e.msg_dict, data=e.data)
-                    logger.error(f"result: {result}")
+                except FAPStatusCodeException as e: # 通过异常类终止程序
+                    result = Response.fail(code=e.code, msg=e.msg)
+                    logger.error(f"[FAPStatusCodeException] result: {result}")
                     return result
-                except Exception as e:
-                    logger.error("", exc_info=True)
-                    if code:
-                        result = Response.exception(code=code)
-                        logger.error(f"result: {result}")
-                        return result
+                except Exception as e: # 其他异常终止的程序
+                    if not code:
+                        raise e # 抛出异常的话，交给异常处理中间件处理，异常打印原则：**捕获自行打印，抛出上层打印**
+
+                    if isinstance(code, StatusCodeEnum):
+                        result = Response.fail(code=code.value, msg=code.name)
+                    elif isinstance(code, tuple):
+                        error_info = cls.make_code(code=code[0])
+                        result = Response.fail(code=error_info.code, msg=error_info.msg)
                     else:
-                        raise e
+                        raise ValueError("code must be StatusCodeEnum or tuple(str, str)")
+                    logger.error(f"[Exception] result: {result}", exc_info=True)
+                    return result
+                    
             return wrapper
         return decorator
 
