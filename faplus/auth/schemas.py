@@ -5,16 +5,13 @@ from faplus.schema import ResponseSchema
 
 
 class UserSchema(BaseModel):
-    """用户模型schema"""
+    """用户模型schema, 去除了冗余字段"""
     id: int
     username: str
-    password: str
     nickname: str | None = None
     email: str | None = None
     mobile: str | None = None
-    is_active: bool
-    created_at: datetime
-    updated_at: datetime
+    is_superuser: bool
 
     class Config:
         orm_mode = True

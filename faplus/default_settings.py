@@ -124,3 +124,6 @@ FAP_CACHE_CONFIG = {
 
 # websocket 路由
 FAP_WS_CLASSES = []
+
+FAP_TOKEN_EXPIRE = 60 * 60 * 24 * 7  # token过期时间
+FAP_CACHE_DEFAULT_EXPIRE = 60 * 60 * 24 * 7  # 默认缓存过期时间

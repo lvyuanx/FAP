@@ -8,14 +8,17 @@ Description: 登录视图
 """
 from fastapi import Body, Request
 
-from faplus import StatusCodeEnum, Response
+from faplus import StatusCodeEnum, const
+from faplus.cache import cache
 from faplus.view import PostView
-from faplus.auth.schemas import LoginReqSchema, UserSchema, LoginResSchema
+from faplus.auth import const as auth_const
+from faplus.auth.schemas import LoginReqSchema, LoginResSchema
 from faplus.auth.utils import user_util
-from faplus.utils import token_util, crypto_util
+from faplus.utils import token_util
+
 
 class View(PostView):
-    
+
     response_model = LoginResSchema
     finally_code = StatusCodeEnum.登录失败
     common_codes = [
@@ -27,22 +30,22 @@ class View(PostView):
         """
         data: LoginReqSchema
         """
-        user = await user_util.authenticate_user(data.username, data.password)
-        if not user:
+        user_dict = await user_util.authenticate_user(data.username, data.password)
+        if not user_dict:
             return View.make_code(StatusCodeEnum.用户名或密码错误)
+
+        uid = user_dict["id"]
+
+        # 失效之前登录的token
+        otk = await cache.get(auth_const.USER_TOKEN_CK.format(uid=uid))
+        if otk:
+            await cache.delete(const.ACTIVATE_TOKEN_CK.format(tk=otk))
         
         # 创建token
-        payload = {"user_id": user.id}
-        token = token_util.create_token(payload)
-        
-        # 解密数据
-        user_dict = UserSchema.from_orm(user).dict()
-        user_dict = crypto_util.secure_decrypt_obj(user_dict, ["username", "email", "mobile"])
+        payload = {"uid": uid}
+        token = await token_util.create_token(payload)
 
-        # 去除字段
-        user_dict.pop("password")
-        user_dict.pop("created_at")
-        user_dict.pop("updated_at")
+        # 重新设置token
+        await cache.set(auth_const.USER_TOKEN_CK.format(uid=uid), token)
 
         return {"token": token, "user": user_dict}
-

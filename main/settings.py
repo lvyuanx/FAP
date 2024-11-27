@@ -35,7 +35,6 @@ FAP_JWT_WHITES = [
 if DEBUG:
     FAP_JWT_WHITES += [
         "/debug/user/create",
-        "/debug/user/test"
     ]
 
 PROJECT_APP_PACKAGES = ["mail"]  # 项目APP包
@@ -122,17 +121,17 @@ DB_PASSWORD = "root"
 
 
 # *************CACHE****************
-# FAP_CACHE_CONFIG = {
-#     "default": {
-#         "BACKEND": "faplus.cache.backends.redis_cache.RedisCache",
-#         "PREFIX": "faplus.",
-#         "OPTIONS": {
-#             "HOST": "127.0.0.1",
-#             "PORT": 6379,
-#             "DB": 0,
-#             "PASSWORD": "",
-#             "MAX_CONNECTIONS": 50,
-#             "ENCODING": "utf-8",
-#         }
-#     }
-# }
+FAP_CACHE_CONFIG = {
+    "default": {
+        "BACKEND": "faplus.cache.backends.redis_cache.RedisCache",
+        "PREFIX": "faplus:",
+        "OPTIONS": {
+            "HOST": "127.0.0.1",
+            "PORT": 6379,
+            "DB": 0,
+            "PASSWORD": "",
+            "MAX_CONNECTIONS": 50,
+            "ENCODING": "utf-8",
+        }
+    }
+}

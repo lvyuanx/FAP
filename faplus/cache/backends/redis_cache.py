@@ -13,7 +13,7 @@ from typing import Any, Optional
 from redis.asyncio import Redis
 from redis.asyncio.connection import ConnectionPool
 
-from faplus.cache.base_cache import BaseCache
+from faplus.cache.base_cache import BaseCache, FAP_CACHE_DEFAULT_EXPIRE
 
 logger = logging.getLogger(__package__)
 
@@ -88,11 +88,10 @@ class RedisCache(BaseCache):
         try:
             return await client.get(key) or default
         except Exception as e:
-            # 记录日志或执行错误处理
             logger.error("Redis get operation failed", exc_info=True)
             return default
 
-    async def set(self, key: str, value: Any, expire: Optional[int] = None) -> None:
+    async def set(self, key: str, value: Any, expire: Optional[int] = FAP_CACHE_DEFAULT_EXPIRE) -> None:
         """
         设置缓存值。
 
@@ -105,7 +104,6 @@ class RedisCache(BaseCache):
         try:
             return await client.set(key, value, ex=expire)
         except Exception as e:
-            # 记录日志或执行错误处理
             logger.error("Redis set operation failed", exc_info=True)
             return False
 
@@ -120,7 +118,6 @@ class RedisCache(BaseCache):
         try:
             return await client.delete(key) > 0
         except Exception as e:
-            # 记录日志或执行错误处理
             logger.error("Redis delete operation failed", exc_info=True)
             return False
 
@@ -131,6 +128,5 @@ class RedisCache(BaseCache):
         try:
             await self.pool.disconnect(inuse_connections=True)
         except Exception as e:
-            # 记录日志或执行错误处理
             logger.error(
                 "Failed to close Redis connection pool", exc_info=True)

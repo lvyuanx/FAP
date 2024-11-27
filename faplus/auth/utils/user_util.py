@@ -7,27 +7,50 @@ Date: 2024/11/21 09:03:50
 Description: 用户工具类
 """
 
+import json
 import logging
 import re
 
 from faplus import FAPStatusCodeException, StatusCodeEnum
 from faplus.auth.models import User
+from faplus.auth.schemas import UserSchema
+from faplus.auth import const
+from faplus.cache import cache
 from faplus.utils import crypto_util
-
-
-SECRET_KEY = "your_secret_key"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
 logger = logging.getLogger(__package__)
 
 
-async def authenticate_user(username: str, password: str, **kwargs) -> User:
-    db_password = crypto_util.enc_pwd(password)
-    db_username = crypto_util.secure_encrypt(username)
-    user = await User.filter(username=db_username, password=db_password, is_active=True).first()
-    return user
+async def get_user_info(**kwargs):
+    """查询用户信息, 会自动加解密以及缓存数据"""
+    if "id" in kwargs:  # 如果携带了id，就先用id去缓存中差
+        encrypt_data = await cache.get(const.USER_CK.format(uid=kwargs["id"]))
+        if encrypt_data:
+            user_str = crypto_util.secure_decrypt(encrypt_data)  # 数据解密
+            return json.loads(user_str)
+    user = await User.filter(**kwargs, is_active=True, is_delete=False).first()
+    if not user:
+        raise FAPStatusCodeException(StatusCodeEnum.用户不存在)
+
+    user_dict = UserSchema.from_orm(user).dict()
+    encrypt_data = crypto_util.secure_encrypt(json.dumps(user_dict))
+    await cache.set(const.USER_CK.format(uid=user.id), encrypt_data)
+
+    return user_dict
+
+
+async def authenticate_user(username: str, password: str, **kwargs) -> dict:
+    try:
+        db_password = crypto_util.enc_pwd(password)
+        db_username = crypto_util.secure_encrypt(username)
+        return await get_user_info(username=db_username, password=db_password)
+    except FAPStatusCodeException as e:
+        if e.code == StatusCodeEnum.用户不存在:
+            return None, None
+        else:
+            raise e
+    
 
 
 async def create_user(username: str, password: str, is_superuser: bool, **kwargs) -> User:
@@ -40,11 +63,11 @@ async def create_user(username: str, password: str, is_superuser: bool, **kwargs
     """
     db_password = crypto_util.enc_pwd(password)
     db_username = crypto_util.secure_encrypt(username)
-    
+
     # 验证密码强度
     if not re.match(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$', password):
         raise ValueError("密码必须至少包含8个字符，包括字母和数字")
-    
+
     create_kwg = {
         "username": db_username,
         "password": db_password,

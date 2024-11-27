@@ -11,7 +11,7 @@ import asyncio
 import time
 from typing import Any, Optional
 
-from faplus.cache.base_cache import BaseCache
+from faplus.cache.base_cache import BaseCache, FAP_CACHE_DEFAULT_EXPIRE
 
 
 class MemoryCache(BaseCache):
@@ -26,12 +26,12 @@ class MemoryCache(BaseCache):
         self._store = {}  # 内存缓存存储
         self._lock = asyncio.Lock()  # 异步锁，确保线程安全
 
-    async def set(self, key: str, value: Any, expire: Optional[int] = None) -> None:
+    async def set(self, key: str, value: Any, expire: Optional[int] = FAP_CACHE_DEFAULT_EXPIRE) -> None:
         """
         设置缓存
         :param key: 缓存键
         :param value: 缓存值
-        :param expire: 过期时间（秒），默认为 None（永久有效）
+        :param expire: 过期时间（秒），None（永久有效）
         """
         async with self._lock:
             expire_at = time.time() + expire if expire else None
