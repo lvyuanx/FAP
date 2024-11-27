@@ -7,6 +7,12 @@ Date: 2024/11/26 14:33:21
 Description: 缓存基类
 """
 
+from faplus import settings, dft_settings
+
+FAP_CACHE_DEFAULT_EXPIRE = getattr(
+    settings, "FAP_CACHE_DEFAULT_EXPIRE", dft_settings.FAP_CACHE_DEFAULT_EXPIRE
+)
+
 
 class BaseCache(object):
     """缓存基类"""
@@ -19,7 +25,7 @@ class BaseCache(object):
     def perfix(self):
         return self._prefix
 
-    async def set(self, key: str, value: str, expire: int = None) -> None:
+    async def set(self, key: str, value: str, expire: int = FAP_CACHE_DEFAULT_EXPIRE) -> None:
         """设置缓存"""
         raise NotImplementedError("cache set method must be implemented")
 

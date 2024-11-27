@@ -118,3 +118,5 @@ FAP_CACHE_CONFIG = {
         "BACKEND": "faplus.cache.backends.menory_cache.MemoryCache",
     }
 }
+FAP_TOKEN_EXPIRE = 60 * 60 * 24 * 7  # token过期时间
+FAP_CACHE_DEFAULT_EXPIRE = 60 * 60 * 24 * 7  # 默认缓存过期时间

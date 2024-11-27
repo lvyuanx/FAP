@@ -8,9 +8,8 @@ Description: 缓存管理器
 """
 import importlib
 import logging
-from datetime import datetime
 
-from .base_cache import BaseCache
+from .base_cache import BaseCache, FAP_CACHE_DEFAULT_EXPIRE
 from faplus import settings, dft_settings
 
 logger = logging.getLogger(__package__)
@@ -54,7 +53,7 @@ class CacheManager(object):
                 f"Error executing cache operation '{method}'", exc_info=True)
             return None
 
-    async def set(self, key: str, value: str, expire: int = None, backend: str = "default") -> None:
+    async def set(self, key: str, value: str, expire: int = FAP_CACHE_DEFAULT_EXPIRE, backend: str = "default") -> None:
         """保存
 
         :param key: 缓存的key

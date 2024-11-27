@@ -1,0 +1,1 @@
+ACTIVATE_TOKEN_CK = "activate_token:{tk}"
