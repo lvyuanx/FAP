@@ -120,14 +120,24 @@ class FastApiPlusApplication(object):
     
     def middleware_register(self, app: FastAPI):
         """中间件注册"""
-        from . import settings
-        middlewares: list[str] = getattr(settings, "FAP_MIDDLEWARE_CLASSES", [])
+        from . import settings, dft_settings
+        middlewares: list[str] = getattr(settings, "FAP_MIDDLEWARE_CLASSES", dft_settings.FAP_MIDDLEWARE_CLASSES)
         for middleware in middlewares:
             path, middleware_name = middleware.rsplit(".", 1)
             module = importlib.import_module(path)
             middleware_cls = getattr(module, middleware_name, None)
             assert middleware_cls, f"{middleware} is not found"
             app.add_middleware(middleware_cls)
+    
+    def websocket_register(self, app: FastAPI):
+        from . import settings, dft_settings
+        websocket_routes: list[str] = getattr(settings, "FAP_WS_CLASSES", dft_settings.FAP_WS_CLASSES)
+        for websocket_route in websocket_routes:
+            path, ws_name = websocket_route.rsplit(".", 1)
+            module = importlib.import_module(path)
+            ws_cls = getattr(module, ws_name, None)
+            assert ws_cls, f"{ws_cls} is not found"
+            app.router.routes.append(ws_cls())
 
                               
 
@@ -145,6 +155,9 @@ class FastApiPlusApplication(object):
 
         # 注册中间件
         self.middleware_register(app)
+        
+        # 注册websocket
+        self.websocket_register(app)
 
         # 启动服务
         host, port = command_args.host_port.split(":")

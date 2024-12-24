@@ -90,6 +90,9 @@ FAP_STARTUP_MODULES = []
 # 关机自动触发的模块
 FAP_SHUTDOWN_MODULES = []
 
+# 中间件
+FAP_MIDDLEWARE_CLASSES = []
+
 
 # 数据库相关
 DB_USERNAME = "root"
@@ -118,3 +121,6 @@ FAP_CACHE_CONFIG = {
         "BACKEND": "faplus.cache.backends.menory_cache.MemoryCache",
     }
 }
+
+# websocket 路由
+FAP_WS_CLASSES = []
