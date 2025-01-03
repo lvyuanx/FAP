@@ -20,13 +20,12 @@ FAP_MIDDLEWARE_CLASSES = [
     "faplus.middlewares.logging_middleware.LoggingMiddleware",
 ]  # 中间件
 
-FAP_STARTUP_MODULES = [
-    "faplus.startups.run_info_startup",
-    "faplus.cache.startups.check_cache_startup"
+FAP_STARTUP_FUNCS = [
+    "faplus.startups.run_info_startup.create_startup_event",
 ]  # 开机自启
 
-FAP_SHUTDOWN_MODULES = [
-    "faplus.shutdowns.close_info_shutdowns",
+FAP_SHUTDOWN_FUNCS = [
+    "faplus.shutdowns.close_info_shutdowns.create_shutdown_event",
 ]  # 关机自启
 
 FAP_JWT_WHITES = [
@@ -121,17 +120,17 @@ DB_PASSWORD = "root"
 
 
 # *************CACHE****************
-FAP_CACHE_CONFIG = {
-    "default": {
-        "BACKEND": "faplus.cache.backends.redis_cache.RedisCache",
-        "PREFIX": "faplus:",
-        "OPTIONS": {
-            "HOST": "127.0.0.1",
-            "PORT": 6379,
-            "DB": 0,
-            "PASSWORD": "",
-            "MAX_CONNECTIONS": 50,
-            "ENCODING": "utf-8",
-        }
-    }
-}
+# FAP_CACHE_CONFIG = {
+#     "default": {
+#         "BACKEND": "faplus.cache.backends.redis_cache.RedisCache",
+#         "PREFIX": "faplus:",
+#         "OPTIONS": {
+#             "HOST": "127.0.0.1",
+#             "PORT": 6379,
+#             "DB": 0,
+#             "PASSWORD": "",
+#             "MAX_CONNECTIONS": 50,
+#             "ENCODING": "utf-8",
+#         }
+#     }
+# }

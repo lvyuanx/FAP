@@ -85,10 +85,10 @@ FAP_LOGIN_URL = "/user/login"
 FAP_TOKEN_TAG = "X-Authorization"
 
 # 开机自启的模块
-FAP_STARTUP_MODULES = []
+FAP_STARTUP_FUNCS = []
 
 # 关机自动触发的模块
-FAP_SHUTDOWN_MODULES = []
+FAP_SHUTDOWN_FUNCS = []
 
 # 中间件
 FAP_MIDDLEWARE_CLASSES = []

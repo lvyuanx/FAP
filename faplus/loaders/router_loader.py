@@ -6,19 +6,17 @@ Author: lvyuanxiang
 Date: 2024/11/07 09:12:38
 Description: 加载路由
 """
-
-from collections import defaultdict
 from enum import Enum
 import importlib
 import logging
 from types import ModuleType
-from typing import Union
 import uuid
 
 from fastapi import FastAPI, APIRouter
 from fastapi.staticfiles import StaticFiles
 from pydantic.main import BaseModel
-from faplus import settings, StatusCodeEnum, dft_settings
+from faplus import settings, dft_settings
+from faplus.applications import FastApiPlusApplication
 from faplus.utils import data_util
 from fastapi.openapi.docs import (
     get_redoc_html,
@@ -191,7 +189,7 @@ def check_app(module: ModuleType):
     return app_name
 
 
-def loader(*args, **kwargs):
+def loader():
     api_module = f"{APPLIICATION_ROOT}.apis"
 
     # 加载路由配置
@@ -265,4 +263,5 @@ def loader(*args, **kwargs):
 
         app.include_router(router=api_group, prefix=gurl)
 
-    return app
+    # 将fastApi注入到FastApiPlusApplication.app中
+    FastApiPlusApplication.app = app

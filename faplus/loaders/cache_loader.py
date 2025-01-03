@@ -8,5 +8,5 @@ Description: 缓存加载器
 """
 
 
-def loader(*args, **kwargs):
+def loader():
     from faplus.cache import cache

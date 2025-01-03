@@ -21,7 +21,7 @@ docs: http://{cmd_args.host_port}{docs_url}
 
 
 def create_startup_event(**kwargs):
-    async def print_info():
+    async def do():
         cmd_args = kwargs.get("cmd_args", None)
         DEBUG = getattr(settings, "DEBUG", dft_settings.DEBUG)
         if not cmd_args or not DEBUG:
@@ -37,4 +37,4 @@ def create_startup_event(**kwargs):
         logger.info(print_template.format(cmd_args=cmd_args, redoc_url=FAP_REDOC_URL,
                     docs_url=FAP_DOCS_URL, time=time_str, version=FAP_VERSION))
 
-    return print_info
+    return do

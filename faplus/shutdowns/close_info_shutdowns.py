@@ -12,7 +12,7 @@ logger = logging.getLogger(__package__)
 
 
 def create_shutdown_event(**kwargs):
-    async def print_info():
+    async def do():
         logger.info("\n\n》》》》》》》》》》》》》》》》》》》》》》》》》 FastApi Plus 《《《《《《《《《《《《《《《《《《《《《《《《《\n\n")
     
-    return print_info
+    return do

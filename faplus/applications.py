@@ -10,21 +10,25 @@ import os
 import logging
 import argparse
 import importlib
+from typing import Tuple, Union
+from functools import partial
 
 import uvicorn
 from fastapi.applications import FastAPI
+from faplus import settings, dft_settings
 
 
 logger = logging.getLogger(__package__)
+package = __package__
 
 
 class FastApiPlusApplication(object):
 
     app: FastAPI = None
+    cmd_args: argparse.Namespace = None
 
     def __init__(self) -> None:
         os.environ.setdefault("FAP_PACKAGE", __package__)
-        self.args = None
         # 初始化logging
         self.get_args()
 
@@ -58,88 +62,112 @@ class FastApiPlusApplication(object):
             "--host_port", type=str, default="127.0.0.1:8848", help="指定服务器监听的 host 和 port，格式如 127.0.0.1:8000")
         parser_runserver.add_argument(
             "--reload", action="store_true", help="是否开启热加载模式")
-        parser_runserver.add_argument("--workers", type=int, default=1, help="指定工作进程数")
-        
+        parser_runserver.add_argument(
+            "--workers", type=int, default=1, help="指定工作进程数")
+
         # migrations
         subparsers.add_parser("migrations", help="生成数据库迁移文件")
 
         # init db
         subparsers.add_parser("init_db", help="初始化数据库")
-        
+
         # migrate
         subparsers.add_parser("migrate", help="执行数据库迁移")
-        
+
         # history
         subparsers.add_parser("history", help="查看数据库迁移历史")
-        
+
         # downgrade
         parser_downgrade = subparsers.add_parser("downgrade", help="回滚数据库迁移")
         parser_downgrade.add_argument("--version", type=str, help="回滚版本")
-        
-        
+
         args = parser.parse_args()
-        self.args = args
+        FastApiPlusApplication.cmd_args = args
         self.execute_command(args)
 
     def load(self):
         """系统中的功能使用loader进行加载"""
-        package = __package__
         loader_lst = [
             "logging_loader",
             "router_loader",
-            "tortoise_loader",
             "cache_loader",
         ]
         try:
             for loader in loader_lst:
-                loader_module = importlib.import_module(f"{package}.loaders.{loader}")
-                res = getattr(loader_module, "loader")(self.app)
-                if res and isinstance(res, FastAPI):
-                    self.app = res
+                loader_module = importlib.import_module(
+                    f"{package}.loaders.{loader}")
+                getattr(loader_module, "loader")()
         except Exception as e:
             logger.error("fast api plus load error", exc_info=True)
             raise e
-    
+
     def event_register(self, app: FastAPI):
         """事件注册"""
-        from . import settings, dft_settings
-        startups: list[str] = getattr(settings, "FAP_STARTUP_MODULES", dft_settings.FAP_STARTUP_MODULES)
-        shutdowns: list[str] = getattr(settings, "FAP_SHUTDOWN_MODULES", dft_settings.FAP_SHUTDOWN_MODULES)
-        def add_event(event: str, module_str: str):
-            module = importlib.import_module(module_str)
-            func_name = f"create_{event}_event"
-            func = getattr(module, func_name, None)
-            assert callable(func), f"{module_str} not has {func_name}"
-            app.add_event_handler(event, func(cmd_args=self.args))
-        
-        for startup in startups:
-            add_event("startup", startup)
-        
-        for shutdown in shutdowns:
-            add_event("shutdown", shutdown)
-    
+        startups: list[Union[str, Tuple[str, dict]]] = getattr(
+            settings, "FAP_STARTUP_FUNCS", dft_settings.FAP_STARTUP_FUNCS)
+        shutdowns: list[Union[str, Tuple[str, dict]]] = getattr(
+            settings, "FAP_SHUTDOWN_FUNCS", dft_settings.FAP_SHUTDOWN_FUNCS)
+
+        def add_event(event_name: str, events: list[Union[str, Tuple[str, dict]]]):
+
+            for event in events:
+                if isinstance(event, str):
+                    func_str = event
+                    kwargs = None
+                elif isinstance(event, tuple):
+                    func_str, kwargs = event
+                else:
+                    raise ValueError(f"{event_name} {event} is not valid")
+            
+                module_name, func_name = func_str.rsplit(".", 1)
+                module = importlib.import_module(module_name)
+                func = getattr(module, func_name, None)
+                assert callable(func), f"{event_name} {func_str} is not callable"
+                
+                if kwargs:
+                    handler = partial(func, **kwargs)
+                else:
+                    handler = func
+                app.add_event_handler(event_name, handler())
+
+
+        add_event("startup", startups)
+        add_event("shutdown", shutdowns)
+
     def middleware_register(self, app: FastAPI):
         """中间件注册"""
-        from . import settings, dft_settings
-        middlewares: list[str] = getattr(settings, "FAP_MIDDLEWARE_CLASSES", dft_settings.FAP_MIDDLEWARE_CLASSES)
+        middlewares: list[Union[str, Tuple[str, dict]]
+                          ] = getattr(settings, "FAP_MIDDLEWARE_CLASSES", dft_settings.FAP_MIDDLEWARE_CLASSES)
         for middleware in middlewares:
-            path, middleware_name = middleware.rsplit(".", 1)
-            module = importlib.import_module(path)
-            middleware_cls = getattr(module, middleware_name, None)
-            assert middleware_cls, f"{middleware} is not found"
-            app.add_middleware(middleware_cls)
-    
+
+            if isinstance(middleware, str):
+                module_class = middleware
+                kwargs = None
+            elif isinstance(middleware, tuple):
+                module_class, kwargs = middleware
+            else:
+                raise ValueError(f"{middleware} is not valid")
+
+            module_name, class_name = module_class.rsplit(".", 1)
+            module = importlib.import_module(module_name)
+            middleware_cls = getattr(module, class_name, None)
+            assert middleware_cls, f"middleware {middleware} is not found"
+
+            if kwargs:
+                app.add_middleware(middleware_cls, **kwargs)
+            else:
+                app.add_middleware(middleware_cls)
+
     def websocket_register(self, app: FastAPI):
         from . import settings, dft_settings
-        websocket_routes: list[str] = getattr(settings, "FAP_WS_CLASSES", dft_settings.FAP_WS_CLASSES)
+        websocket_routes: list[str] = getattr(
+            settings, "FAP_WS_CLASSES", dft_settings.FAP_WS_CLASSES)
         for websocket_route in websocket_routes:
             path, ws_name = websocket_route.rsplit(".", 1)
             module = importlib.import_module(path)
             ws_cls = getattr(module, ws_name, None)
             assert ws_cls, f"{ws_cls} is not found"
             app.router.routes.append(ws_cls())
-
-                              
 
     def runserver(self, command_args: argparse.Namespace):
         """启动服务器"""
@@ -149,13 +177,13 @@ class FastApiPlusApplication(object):
         app = self.app
         if not app:
             raise RuntimeError("application is None")
-        
+
         # 注册事件
         self.event_register(app)
 
         # 注册中间件
         self.middleware_register(app)
-        
+
         # 注册websocket
         self.websocket_register(app)
 
@@ -163,28 +191,24 @@ class FastApiPlusApplication(object):
         host, port = command_args.host_port.split(":")
         uvicorn.run(app, host=host, port=int(port),
                     reload=command_args.reload, workers=command_args.workers, log_level="error")
-    
-    
+
     def run_cmd(self, cmd: str):
         import subprocess
         subprocess.run(cmd, shell=True)
-    
-    
+
     def migrations(self, command_args: argparse.Namespace):
         self.run_cmd(f"aerich init -t {__package__}.orm.tortoise.TORTOISE_ORM")
-    
+
     def init_db(self, command_args: argparse.Namespace):
         self.run_cmd("aerich init-db")
-    
+
     def migrate(self, command_args: argparse.Namespace):
         self.run_cmd("aerich migrate")
         self.run_cmd("aerich upgrade")
-    
-    
+
     def downgrade(self, command_args: argparse.Namespace):
         version = command_args.version
         self.run_cmd(f"aerich downgrade -v {version} -d")
-    
+
     def history(self, command_args: argparse):
         self.run_cmd("aerich downgrade --help")
-        
