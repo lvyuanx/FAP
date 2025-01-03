@@ -21,13 +21,14 @@ FAP_MIDDLEWARE_CLASSES = [
 ]  # 中间件
 
 FAP_STARTUP_FUNCS = [
-    "faplus.startups.tortoise_orm_startup.tortoise_orm_init_event",
-    "faplus.startups.run_info_startup.run_info_event",
+    "faplus.startups.cache_ping_startup.cache_ping_event", # 缓存ping
+    "faplus.startups.tortoise_orm_startup.tortoise_orm_init_event", # 数据库ORM初始化
+    "faplus.startups.run_info_startup.run_info_event", # 开机信息
 ]  # 开机自启
 
 FAP_SHUTDOWN_FUNCS = [
-    "faplus.shutdowns.close_info_shutdown.close_info_event",
-    "faplus.shutdowns.tortoise_orm_shutdown.tortoise_orm_close_event",
+    "faplus.shutdowns.tortoise_orm_shutdown.tortoise_orm_close_event", # 数据库ORM关闭
+    "faplus.shutdowns.close_info_shutdown.close_info_event", # 关机信息
 ]  # 关机自启
 
 FAP_JWT_WHITES = [
@@ -123,17 +124,17 @@ DB_PASSWORD = "root"
 
 
 # *************CACHE****************
-# FAP_CACHE_CONFIG = {
-#     "default": {
-#         "BACKEND": "faplus.cache.backends.redis_cache.RedisCache",
-#         "PREFIX": "faplus:",
-#         "OPTIONS": {
-#             "HOST": "127.0.0.1",
-#             "PORT": 6379,
-#             "DB": 0,
-#             "PASSWORD": "",
-#             "MAX_CONNECTIONS": 50,
-#             "ENCODING": "utf-8",
-#         }
-#     }
-# }
+FAP_CACHE_CONFIG = {
+    "default": {
+        "BACKEND": "faplus.cache.backends.redis_cache.RedisCache",
+        "PREFIX": "faplus:",
+        "OPTIONS": {
+            "HOST": "127.0.0.1",
+            "PORT": 6379,
+            "DB": 0,
+            "PASSWORD": "",
+            "MAX_CONNECTIONS": 50,
+            "ENCODING": "utf-8",
+        }
+    }
+}

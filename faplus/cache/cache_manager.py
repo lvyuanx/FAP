@@ -104,7 +104,8 @@ class CacheManager(object):
         :param backend: 缓存的backend, defaults to "default"
         :return: 是否可用
         """
-        return await self._execute_cache_operation("ping", backend=backend)
+        cache = self.get_backend(backend)
+        return await cache.ping()
 
 
 FAP_CACHE_CONFIG = getattr(
