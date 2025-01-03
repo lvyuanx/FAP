@@ -21,11 +21,13 @@ FAP_MIDDLEWARE_CLASSES = [
 ]  # 中间件
 
 FAP_STARTUP_FUNCS = [
-    "faplus.startups.run_info_startup.create_startup_event",
+    "faplus.startups.tortoise_orm_startup.tortoise_orm_init_event",
+    "faplus.startups.run_info_startup.run_info_event",
 ]  # 开机自启
 
 FAP_SHUTDOWN_FUNCS = [
-    "faplus.shutdowns.close_info_shutdowns.create_shutdown_event",
+    "faplus.shutdowns.close_info_shutdown.close_info_event",
+    "faplus.shutdowns.tortoise_orm_shutdown.tortoise_orm_close_event",
 ]  # 关机自启
 
 FAP_JWT_WHITES = [
@@ -34,6 +36,7 @@ FAP_JWT_WHITES = [
 if DEBUG:
     FAP_JWT_WHITES += [
         "/debug/user/create",
+        "/debug/md5/encrypt",
     ]
 
 PROJECT_APP_PACKAGES = ["mail"]  # 项目APP包
