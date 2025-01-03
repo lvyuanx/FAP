@@ -1,7 +1,7 @@
 import logging
 
-from datetime import datetime, time
-from faplus import settings, dft_settings
+from datetime import datetime
+from faplus import settings, dft_settings, FastApiPlusApplication
 
 logger = logging.getLogger(__package__)
 
@@ -20,12 +20,13 @@ docs: http://{cmd_args.host_port}{docs_url}
 """ + split_line + "\n\n"
 
 
-def create_startup_event(**kwargs):
+def run_info_event(**kwargs):
     async def do():
-        cmd_args = kwargs.get("cmd_args", None)
         DEBUG = getattr(settings, "DEBUG", dft_settings.DEBUG)
-        if not cmd_args or not DEBUG:
+        if not DEBUG:
             return
+        
+        cmd_args = FastApiPlusApplication.cmd_args
 
         FAP_REDOC_URL = getattr(settings, "FAP_REDOC_URL",
                                 dft_settings.FAP_REDOC_URL)

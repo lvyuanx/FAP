@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger(__package__)
 
 
-def create_shutdown_event(**kwargs):
+def close_info_event(**kwargs):
     async def do():
         logger.info("\n\n》》》》》》》》》》》》》》》》》》》》》》》》》 FastApi Plus 《《《《《《《《《《《《《《《《《《《《《《《《《\n\n")
     
