@@ -6,8 +6,10 @@ Author: lvyuanxiang
 Date: 2024/11/19 17:23:40
 Description: FAP用到的所有默认配置
 """
+from pathlib import Path
 
 DEBUG = True
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # 在线文档swagger地址
 FAP_DOCS_URL = "/docs"
@@ -127,3 +129,7 @@ FAP_WS_CLASSES = []
 
 FAP_TOKEN_EXPIRE = 60 * 60 * 24 * 7  # token过期时间
 FAP_CACHE_DEFAULT_EXPIRE = 60 * 60 * 24 * 7  # 默认缓存过期时间
+
+# 媒体
+FAP_MEDIA_DIR = None
+FAP_MEDIA_URL = "/media"

@@ -6,10 +6,11 @@ Author: lvyuanxiang
 Date: 2024/11/07 09:54:54
 Description: FAP配置文件
 """
-
+from pathlib import Path
 
 DEBUG = True
 APPLICATION_ROOT = "main"
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
 
@@ -43,7 +44,8 @@ if DEBUG:
 PROJECT_APP_PACKAGES = ["mail"]  # 项目APP包
 
 FAP_INSERTAPPS = [
-    "faplus.auth"
+    "faplus.auth",
+    "faplus.media"
 ] + PROJECT_APP_PACKAGES  # 注册的应用 框架app包+项目app包
 
 # *************密钥****************
