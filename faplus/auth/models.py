@@ -10,6 +10,8 @@ from tortoise import fields
 from tortoise.indexes import Index
 from tortoise.models import Model
 
+from faplus.utils import time_util
+
 
 
 class User(Model):
@@ -23,9 +25,9 @@ class User(Model):
     is_active = fields.BooleanField(default=True, description="是否激活")
     is_delete = fields.BooleanField(default=False, description="是否删除")
     is_superuser = fields.BooleanField(default=False, description="是否是超级管理员")
-    created_at = fields.DatetimeField(auto_now_add=True, description="创建时间")
-    delete_at = fields.DatetimeField(null=True, description="删除时间")
-    updated_at = fields.DatetimeField(auto_now=True, description="更新时间")
+    created_at = fields.IntField(default=time_util.now_timestamp(), description="创建时间")
+    delete_at = fields.IntField(null=True, description="删除时间")
+    updated_at = fields.IntField(null=True, description="更新时间")
     
     class Meta:
         table = "user"

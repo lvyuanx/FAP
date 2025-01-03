@@ -72,6 +72,14 @@ def now_str(format: str = default_format, tz: pytz.timezone = default_tz):
     """
     return datetime_to_str(now(tz), format, tz)
 
+def now_timestamp(tz: pytz.timezone = default_tz) -> int:
+    """获取当前时间戳
+    
+    :param tz: 时区
+    :return: 当前时间戳
+    """
+    return datetime_to_timestamp(now(tz), tz)
+
 def in_range(datetime: datetime, start: datetime, end: datetime, tz: pytz.timezone = default_tz) -> bool:
     """判断时间是否在范围内
     

@@ -28,6 +28,7 @@ venv/
 dist/
 build/
 *.log
+migrations/
 
 # 忽略 Java 相关文件
 *.class
