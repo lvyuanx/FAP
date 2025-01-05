@@ -6,6 +6,7 @@ Author: lvyuanxiang
 Date: 2024/11/07 09:54:54
 Description: FAP配置文件
 """
+import os
 from pathlib import Path
 
 DEBUG = True
@@ -14,38 +15,42 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
 
+FAP_MEDIA_ROOT = os.path.join(BASE_DIR.parent, "media")
+FAP_MEDIA_URL = "/media"
+
 OPEN_VERSION = ["", "/v1"]  # 开启的版本， "": 默认版本
 
 FAP_MIDDLEWARE_CLASSES = [
-    "faplus.middlewares.jwt_middleware.JwtMiddleware",
     "faplus.middlewares.logging_middleware.LoggingMiddleware",
+    "faplus.media.middlewares.file_download_middleware.FileDownloadMiddleware",
+    "faplus.middlewares.jwt_middleware.JwtMiddleware",
 ]  # 中间件
 
 FAP_STARTUP_FUNCS = [
-    "faplus.startups.cache_ping_startup.cache_ping_event", # 缓存ping
-    "faplus.startups.tortoise_orm_startup.tortoise_orm_init_event", # 数据库ORM初始化
-    "faplus.startups.run_info_startup.run_info_event", # 开机信息
+    "faplus.startups.cache_ping_startup.cache_ping_event",  # 缓存ping
+    "faplus.startups.tortoise_orm_startup.tortoise_orm_init_event",  # 数据库ORM初始化
+    "faplus.startups.run_info_startup.run_info_event",  # 开机信息
 ]  # 开机自启
 
 FAP_SHUTDOWN_FUNCS = [
-    "faplus.shutdowns.tortoise_orm_shutdown.tortoise_orm_close_event", # 数据库ORM关闭
-    "faplus.shutdowns.close_info_shutdown.close_info_event", # 关机信息
+    "faplus.shutdowns.tortoise_orm_shutdown.tortoise_orm_close_event",  # 数据库ORM关闭
+    "faplus.shutdowns.close_info_shutdown.close_info_event",  # 关机信息
 ]  # 关机自启
 
-FAP_JWT_WHITES = [
-]  # 白名单
+FAP_JWT_WHITES = []  # 白名单
 
 if DEBUG:
     FAP_JWT_WHITES += [
         "/debug/user/create",
         "/debug/md5/encrypt",
+        "/media/debug/donwload/c34e2e9fe736b8abe589ddef3e31d19c515d456d737904ab1dea51a938eddfde",
     ]
 
 PROJECT_APP_PACKAGES = ["mail"]  # 项目APP包
 
 FAP_INSERTAPPS = [
     "faplus.auth",
-    "faplus.media"
+    "faplus.media",
 ] + PROJECT_APP_PACKAGES  # 注册的应用 框架app包+项目app包
 
 # *************密钥****************
@@ -105,12 +110,8 @@ SITE_CONFIG = {
         # "mails": ("2466057319@qq.com", "382858170@qq.com", "763642711@qq.com", "156394694@qq.com")
         "mails": ("2466057319@qq.com",)
     },
-    "pis_shengfy": {
-        "mails": ("2466057319@qq.com",)
-    },
-    "watch_inteface": {
-        "mails": ("2466057319@qq.com",)
-    },
+    "pis_shengfy": {"mails": ("2466057319@qq.com",)},
+    "watch_inteface": {"mails": ("2466057319@qq.com",)},
 }
 
 
@@ -134,9 +135,9 @@ FAP_CACHE_CONFIG = {
             "HOST": "127.0.0.1",
             "PORT": 6379,
             "DB": 0,
-            "PASSWORD": "",
+            "PASSWORD": "root",
             "MAX_CONNECTIONS": 50,
             "ENCODING": "utf-8",
-        }
+        },
     }
 }

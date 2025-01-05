@@ -6,9 +6,12 @@ Author: lvyuanxiang
 Date: 2024/11/06 10:23:00
 Description: fastapi post 视图基类
 """
-from dataclasses import MISSING
 import logging
 import functools
+from typing import Union, Type
+
+from fastapi import Header, Request, Body, Query, Path, Form, File, UploadFile
+from fastapi.responses import StreamingResponse
 
 from faplus import FAPStatusCodeException, settings, dft_settings
 from faplus.schema import ResponseSchema
@@ -47,7 +50,9 @@ class BaseView:
     status_codes = []  # 接口异常状态码(<code>, <msg>)
 
     @classmethod
-    def make_code(cls, code: str | StatusCodeEnum, msg_dict: dict = None) -> ErrorInfo:
+    def make_code(
+        cls, code: Union[str, StatusCodeEnum], msg_dict: dict = None
+    ) -> ErrorInfo:
         if isinstance(code, str):
             code = f"{cls.api_code}{code}"
             if code not in cls.code_dict:
@@ -73,6 +78,7 @@ class BaseView:
     @classmethod
     def _api_wrapper(cls, code: StatusCodeEnum | tuple[str, str] = None):
         """api装饰器，能够帮助处理异常，以及返回值的处理"""
+
         def decorator(func):
             @functools.wraps(func)
             async def wrapper(*args, **kwargs):
@@ -87,16 +93,22 @@ class BaseView:
                         result = Response.fail(code=result.code, msg=msg)
                         logger.error(f"[ErrorInfo] result: {result}")
                     else:  # 正常返回
-                        result = Response.ok(data=result)
-                        logger.debug(f"result: {result}")
+                        request = kwargs.get("request")
+                        if (
+                            isinstance(request, Request)
+                            and request.headers.get("Content-Type")
+                            == "application/json"
+                        ):
+                            result = Response.ok(data=result)
+                            logger.debug(f"result: {result}")
                     return result
-                except FAPStatusCodeException as e: # 通过异常类终止程序
+                except FAPStatusCodeException as e:  # 通过异常类终止程序
                     result = Response.fail(code=e.code, msg=e.msg)
                     logger.error(f"[FAPStatusCodeException] result: {result}")
                     return result
-                except Exception as e: # 其他异常终止的程序
+                except Exception as e:  # 其他异常终止的程序
                     if not code:
-                        raise e # 抛出异常的话，交给异常处理中间件处理，异常打印原则：**捕获自行打印，抛出上层打印**
+                        raise e  # 抛出异常的话，交给异常处理中间件处理，异常打印原则：**捕获自行打印，抛出上层打印**
 
                     if isinstance(code, StatusCodeEnum):
                         result = Response.fail(code=code.value, msg=code.name)
@@ -104,11 +116,14 @@ class BaseView:
                         error_info = cls.make_code(code=code[0])
                         result = Response.fail(code=error_info.code, msg=error_info.msg)
                     else:
-                        raise ValueError("code must be StatusCodeEnum or tuple(str, str)")
+                        raise ValueError(
+                            "code must be StatusCodeEnum or tuple(str, str)"
+                        )
                     logger.error(f"[Exception] result: {result}", exc_info=True)
                     return result
-                    
+
             return wrapper
+
         return decorator
 
     def __init_subclass__(cls) -> None:

@@ -50,7 +50,7 @@ async def authenticate_user(username: str, password: str, **kwargs) -> dict:
             return None, None
         else:
             raise e
-    
+
 
 
 async def create_user(username: str, password: str, is_superuser: bool, **kwargs) -> User:
@@ -71,6 +71,7 @@ async def create_user(username: str, password: str, is_superuser: bool, **kwargs
     create_kwg = {
         "username": db_username,
         "password": db_password,
+        "nickname": kwargs.get("nickname"),
         "is_superuser": is_superuser,
     }
     email = kwargs.get("email")

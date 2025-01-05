@@ -9,16 +9,48 @@ Description: 文件操作相关工具
 import os
 import hashlib
 import logging
-from typing import Union
+import secrets
+import string
 
 from fastapi import UploadFile
+import aiofiles
+
+from faplus.media.models import SNRecord
 
 logger = logging.getLogger(__package__)
 
 
-async def save_upload_file(file: UploadFile, save_path: str, file_name: str = None) -> tuple[str, str]:
+async def generate_sn(len: int = 18, retry: int = 0) -> str:
+    """生成唯一的指定长度的sn码（包含字母数字）
+
+    :param len: sn码长度, 最低长度为16位
+    :return: sn码
+    """
+    if retry > 5:
+        logger.error("生成sn码失败，重试次数过多")
+        raise Exception("生成sn码失败")
+    len = max(16, len)
+
+    # 定义字符集：包括大小写字母和数字
+    characters = string.ascii_letters + string.digits
+
+    # 使用 secrets.choice 从字符集中随机选择字符以构建 SN 码
+    sn = "".join(secrets.choice(characters) for _ in range(len))
+
+    if await SNRecord.exists(sn=sn):  # 如果生成的 SN 码已经存在，则重新生成
+        return await generate_sn(len, retry + 1)
+    else:
+        # 占用sn
+        await SNRecord.create(sn=sn)
+
+    return sn
+
+
+async def save_upload_file(
+    file: UploadFile, save_path: str, file_name: str = None
+) -> tuple[str, str]:
     """保存上传的文件并生成哈希值作为文件名
-    
+
     :param file: 上传的文件
     :param save_path: 保存地址
     :param file_name: 文件名称（可选）
@@ -42,25 +74,37 @@ async def save_upload_file(file: UploadFile, save_path: str, file_name: str = No
 
     # 如果文件已经存在，跳过保存
     if os.path.exists(file_path):
-        return (file_hash, file_name)
+        return (file_hash, final_file_name)
 
     # 保存文件
-    with open(file_path, "wb") as f:
-        f.write(file_content)
+    async with aiofiles.open(file_path, "wb") as f:
+        await f.write(file_content)
 
     # 重新设置文件指针到开头
     await file.seek(0)
-    
-    return (file_hash, file_name)
+
+    return (file_hash, final_file_name)
 
 
-def delete_file(file_path: str):
+async def delete_file(file_path: str):
     """删除文件
-    
+
     :param file_path: 文件路径
     :return: 是否删除成功
     """
     if not os.path.exists(file_path):
         return
     os.remove(file_path)
- 
+
+
+async def get_file(file_path: str, file_name: str):
+    """获取文件
+    :param file_path: 文件路径
+    :param file_name: 文件名称
+    :return: 文件内容
+    """
+    fpath = os.path.join(file_path, file_name)
+    if not os.path.exists(fpath):
+        return
+    async with aiofiles.open(fpath, "rb") as f:
+        return await f.read()

@@ -18,8 +18,8 @@ from fastapi.applications import FastAPI
 from faplus import settings, dft_settings
 
 
-logger = logging.getLogger(__package__)
 package = __package__
+logger = logging.getLogger(package)
 
 
 class FastApiPlusApplication(object):
@@ -50,20 +50,24 @@ class FastApiPlusApplication(object):
 
     def get_args(self):
         """获取命令行参数"""
-        parser = argparse.ArgumentParser(
-            description="FastApiPlus 启动参数"
-        )
+        parser = argparse.ArgumentParser(description="FastApiPlus 启动参数")
         # 创建子解析器，用于管理子命令
         subparsers = parser.add_subparsers(dest="command", help="子命令")
 
         # runserver
         parser_runserver = subparsers.add_parser("runserver", help="启动服务器")
         parser_runserver.add_argument(
-            "--host_port", type=str, default="127.0.0.1:8848", help="指定服务器监听的 host 和 port，格式如 127.0.0.1:8000")
+            "--host_port",
+            type=str,
+            default="127.0.0.1:8848",
+            help="指定服务器监听的 host 和 port，格式如 127.0.0.1:8000",
+        )
         parser_runserver.add_argument(
-            "--reload", action="store_true", help="是否开启热加载模式")
+            "--reload", action="store_true", help="是否开启热加载模式"
+        )
         parser_runserver.add_argument(
-            "--workers", type=int, default=1, help="指定工作进程数")
+            "--workers", type=int, default=1, help="指定工作进程数"
+        )
 
         # migrations
         subparsers.add_parser("migrations", help="生成数据库迁移文件")
@@ -94,8 +98,7 @@ class FastApiPlusApplication(object):
         ]
         try:
             for loader in loader_lst:
-                loader_module = importlib.import_module(
-                    f"{package}.loaders.{loader}")
+                loader_module = importlib.import_module(f"{package}.loaders.{loader}")
                 getattr(loader_module, "loader")()
         except Exception as e:
             logger.error("fast api plus load error", exc_info=True)
@@ -104,9 +107,11 @@ class FastApiPlusApplication(object):
     def event_register(self, app: FastAPI):
         """事件注册"""
         startups: list[Union[str, Tuple[str, dict]]] = getattr(
-            settings, "FAP_STARTUP_FUNCS", dft_settings.FAP_STARTUP_FUNCS)
+            settings, "FAP_STARTUP_FUNCS", dft_settings.FAP_STARTUP_FUNCS
+        )
         shutdowns: list[Union[str, Tuple[str, dict]]] = getattr(
-            settings, "FAP_SHUTDOWN_FUNCS", dft_settings.FAP_SHUTDOWN_FUNCS)
+            settings, "FAP_SHUTDOWN_FUNCS", dft_settings.FAP_SHUTDOWN_FUNCS
+        )
 
         def add_event(event_name: str, events: list[Union[str, Tuple[str, dict]]]):
 
@@ -118,26 +123,26 @@ class FastApiPlusApplication(object):
                     func_str, kwargs = event
                 else:
                     raise ValueError(f"{event_name} {event} is not valid")
-            
+
                 module_name, func_name = func_str.rsplit(".", 1)
                 module = importlib.import_module(module_name)
                 func = getattr(module, func_name, None)
                 assert callable(func), f"{event_name} {func_str} is not callable"
-                
+
                 if kwargs:
                     handler = partial(func, **kwargs)
                 else:
                     handler = func
                 app.add_event_handler(event_name, handler())
 
-
         add_event("startup", startups)
         add_event("shutdown", shutdowns)
 
     def middleware_register(self, app: FastAPI):
         """中间件注册"""
-        middlewares: list[Union[str, Tuple[str, dict]]
-                          ] = getattr(settings, "FAP_MIDDLEWARE_CLASSES", dft_settings.FAP_MIDDLEWARE_CLASSES)
+        middlewares: list[Union[str, Tuple[str, dict]]] = getattr(
+            settings, "FAP_MIDDLEWARE_CLASSES", dft_settings.FAP_MIDDLEWARE_CLASSES
+        )
         for middleware in middlewares:
 
             if isinstance(middleware, str):
@@ -160,8 +165,10 @@ class FastApiPlusApplication(object):
 
     def websocket_register(self, app: FastAPI):
         from . import settings, dft_settings
+
         websocket_routes: list[str] = getattr(
-            settings, "FAP_WS_CLASSES", dft_settings.FAP_WS_CLASSES)
+            settings, "FAP_WS_CLASSES", dft_settings.FAP_WS_CLASSES
+        )
         for websocket_route in websocket_routes:
             path, ws_name = websocket_route.rsplit(".", 1)
             module = importlib.import_module(path)
@@ -189,11 +196,18 @@ class FastApiPlusApplication(object):
 
         # 启动服务
         host, port = command_args.host_port.split(":")
-        uvicorn.run(app, host=host, port=int(port),
-                    reload=command_args.reload, workers=command_args.workers, log_level="error")
+        uvicorn.run(
+            app,
+            host=host,
+            port=int(port),
+            reload=command_args.reload,
+            workers=command_args.workers,
+            log_level="error",
+        )
 
     def run_cmd(self, cmd: str):
         import subprocess
+
         subprocess.run(cmd, shell=True)
 
     def migrations(self, command_args: argparse.Namespace):

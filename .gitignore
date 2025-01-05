@@ -95,6 +95,7 @@ docker-compose.override.yml
 *.bak
 *.tmp
 *.swp
+.history/
 
 # 忽略图片、压缩包和大文件缓存
 *.zip

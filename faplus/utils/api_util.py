@@ -1,3 +1,7 @@
+import io
+import urllib.parse
+
+from fastapi.responses import StreamingResponse, Response as FAResponse
 from faplus.utils.config_util import StatusCodeEnum
 from faplus.schema import ResponseSchema
 
@@ -16,3 +20,19 @@ class Response(object):
     @staticmethod
     def fail(code: str, msg: str):
         return ResponseSchema(code=code, msg=msg, data=None)
+
+    @staticmethod
+    def download(file: bytes, file_name: str = None):
+        # 文件名可能是非ASCII字符，所以我们需要正确地编码它。
+        encoded_filename = urllib.parse.quote(file_name)
+        content_disposition = f"attachment; filename*=UTF-8''{encoded_filename}"
+
+        return StreamingResponse(
+            io.BytesIO(file),
+            media_type="application/octet-stream",
+            headers={"Content-Disposition": content_disposition},
+        )
+
+    @staticmethod
+    def img(file: bytes, content_type: str):
+        return FAResponse(content=file, media_type=content_type)
