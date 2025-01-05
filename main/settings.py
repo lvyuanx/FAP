@@ -21,9 +21,12 @@ FAP_MEDIA_URL = "/media"
 OPEN_VERSION = ["", "/v1"]  # 开启的版本， "": 默认版本
 
 FAP_MIDDLEWARE_CLASSES = [
-    "faplus.middlewares.logging_middleware.LoggingMiddleware",
-    "faplus.media.middlewares.file_download_middleware.FileDownloadMiddleware",
-    "faplus.middlewares.jwt_middleware.JwtMiddleware",
+    "faplus.middlewares.error_status_code_middleware.ErrorStatusCodeMiddleware",  # 异常码中间件
+    "faplus.media.middlewares.file_download_middleware.FileDownloadMiddleware",  # 文件下载中间件
+    "faplus.middlewares.jwt_middleware.JwtMiddleware",  # jwt中间件
+    "faplus.middlewares.static_middleware.StaticMiddleware",  # 静态资源中间件
+    "faplus.middlewares.whitelist_middleware.WhitelistMiddleware",  # 白名单中间件
+    "faplus.middlewares.logging_middleware.LoggingMiddleware",  # 日志中间件
 ]  # 中间件
 
 FAP_STARTUP_FUNCS = [
