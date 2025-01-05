@@ -1,8 +1,10 @@
 import importlib
 import logging
 import os
+from typing import Any
 
 logger = logging.getLogger("faplus")
+
 
 class ModuleLoader:
     def __init__(self, module_name="settings"):
@@ -34,6 +36,7 @@ settings = ModuleLoader(FAP_SETTINGS_MODULE)  # settings.py 文件的模块名�
 
 dft_settings = ModuleLoader("faplus.default_settings")
 
+
 def import_status_code_enum():
     try:
         # 确保 settings.APPLIICATION_ROOT 是可信的
@@ -46,12 +49,26 @@ def import_status_code_enum():
         module = importlib.import_module(module_path)
 
         # 获取 StatusCodeEnum
-        status_code_enum = getattr(module, 'StatusCodeEnum', None)
+        status_code_enum = getattr(module, "StatusCodeEnum", None)
         if status_code_enum is None:
-            raise AttributeError(f"Module {module_path} does not contain 'StatusCodeEnum'")
-        
+            raise AttributeError(
+                f"Module {module_path} does not contain 'StatusCodeEnum'"
+            )
+
         return status_code_enum
     except (ImportError, AttributeError, ValueError) as e:
         raise RuntimeError(f"Failed to import StatusCodeEnum: {e}") from e
 
+
 StatusCodeEnum = import_status_code_enum()
+
+
+def get_setting_with_default(cfg_name: str, default: Any = None):
+    """获取配置项，如果配置项不存在，则返回默认值
+    :param cfg_name: 配置项名称
+    :param default: 默认值
+    :return: 配置项值
+    """
+    return getattr(
+        settings, cfg_name, default if default else getattr(dft_settings, cfg_name)
+    )

@@ -15,7 +15,7 @@ import uuid
 from fastapi import FastAPI, APIRouter
 from fastapi.staticfiles import StaticFiles
 from pydantic.main import BaseModel
-from faplus import settings, dft_settings
+from faplus import get_setting_with_default
 from faplus.applications import FastApiPlusApplication
 from faplus.utils import data_util
 from fastapi.openapi.docs import (
@@ -24,32 +24,24 @@ from fastapi.openapi.docs import (
     get_swagger_ui_oauth2_redirect_html,
 )
 
-APPLIICATION_ROOT = getattr(settings, "APPLICATION_ROOT")  # 程序根app路径
-FAP_DOCS_URL = getattr(settings, "FAP_DOCS_URL", dft_settings.FAP_DOCS_URL)
-FAP_REDOC_URL = getattr(settings, "FAP_REDOC_URL", dft_settings.FAP_REDOC_URL)
-FAP_DOC_IS_LOCAL_STATIC = getattr(
-    settings, "FAP_DOC_IS_LOCAL_STATIC", dft_settings.FAP_DOC_IS_LOCAL_STATIC)
-FAP_STATIC_URL = getattr(settings, "FAP_STATIC_URL",
-                         dft_settings.FAP_STATIC_URL)
-FAP_STATIC_NAME = getattr(settings, "FAP_STATIC_NAME",
-                          dft_settings.FAP_STATIC_NAME)
-FAP_TITLE = getattr(settings, "FAP_TITLE", dft_settings.FAP_TITLE)
-FAP_DESCRIPTION = getattr(settings, "FAP_DESCRIPTION",
-                          dft_settings.FAP_DESCRIPTION)
-FAP_VERSION = getattr(settings, "FAP_VERSION", dft_settings.FAP_VERSION)
-FAP_CONTACT = getattr(settings, "FAP_CONTACT", dft_settings.FAP_CONTACT)
-FAP_LICENSE = getattr(settings, "FAP_LICENSE", dft_settings.FAP_LICENSE)
-FAP_OPENAPI_URL = getattr(settings, "FAP_OPENAPI_URL",
-                          dft_settings.FAP_OPENAPI_URL)
-FAP_APP_DEBUG = getattr(settings, "FAP_APP_DEBUG", dft_settings.FAP_APP_DEBUG)
-FAP_API_CODE_NUM = getattr(
-    settings, "FAP_API_CODE_NUM", dft_settings.FAP_API_CODE_NUM)
-FAP_API_EXAMPLE_ADAPTER = getattr(
-    settings, "FAP_API_EXAMPLE_ADAPTER", dft_settings.FAP_API_EXAMPLE_ADAPTER)
-FAP_INSERTAPPS = getattr(settings, "FAP_INSERTAPPS",
-                         dft_settings.FAP_INSERTAPPS)
-DEBUG = getattr(settings, "DEBUG", dft_settings.DEBUG)
-OPEN_VERSION = getattr(settings, "OPEN_VERSION", dft_settings.OPEN_VERSION)
+APPLIICATION_ROOT = get_setting_with_default("APPLICATION_ROOT")  # 程序根app路径
+FAP_DOCS_URL = get_setting_with_default("FAP_DOCS_URL")
+FAP_REDOC_URL = get_setting_with_default("FAP_REDOC_URL")
+FAP_DOC_IS_LOCAL_STATIC = get_setting_with_default("FAP_DOC_IS_LOCAL_STATIC")
+FAP_STATIC_URL = get_setting_with_default("FAP_STATIC_URL")
+FAP_STATIC_NAME = get_setting_with_default("FAP_STATIC_NAME")
+FAP_TITLE = get_setting_with_default("FAP_TITLE")
+FAP_DESCRIPTION = get_setting_with_default("FAP_DESCRIPTION")
+FAP_VERSION = get_setting_with_default("FAP_VERSION")
+FAP_CONTACT = get_setting_with_default("FAP_CONTACT")
+FAP_LICENSE = get_setting_with_default("FAP_LICENSE")
+FAP_OPENAPI_URL = get_setting_with_default("FAP_OPENAPI_URL")
+FAP_APP_DEBUG = get_setting_with_default("FAP_APP_DEBUG")
+FAP_API_CODE_NUM = get_setting_with_default("FAP_API_CODE_NUM")
+FAP_API_EXAMPLE_ADAPTER = get_setting_with_default("FAP_API_EXAMPLE_ADAPTER")
+FAP_INSERTAPPS = get_setting_with_default("FAP_INSERTAPPS")
+DEBUG = get_setting_with_default("DEBUG")
+OPEN_VERSION = get_setting_with_default("OPEN_VERSION")
 
 
 logger = logging.getLogger(__package__)
@@ -72,8 +64,9 @@ def init_app() -> FastAPI:
     if FAP_DOC_IS_LOCAL_STATIC:
         app.docs_url = None
         app.redoc_url = None
-        app.mount(FAP_STATIC_URL, StaticFiles(
-            directory=FAP_STATIC_NAME), name="fap_static")
+        app.mount(
+            FAP_STATIC_URL, StaticFiles(directory=FAP_STATIC_NAME), name="fap_static"
+        )
 
         @app.get(FAP_DOCS_URL, include_in_schema=False)
         async def custom_swagger_ui_html():
@@ -121,10 +114,8 @@ def generate_responses(
     example[200] = {
         "description": "请求成功",
         "content": {
-            "application/json": {
-                "example": data_util.generate_example(response_model)
-            }
-        }
+            "application/json": {"example": data_util.generate_example(response_model)}
+        },
     }
 
     # error
@@ -133,49 +124,36 @@ def generate_responses(
         code = f"{api_code}{code}"
         example[int(code)] = {
             "description": msg,
-            "content": {
-                "application/json": {
-                    "example": adapter.error(code, msg)
-                }
-            }
+            "content": {"application/json": {"example": adapter.error(code, msg)}},
         }
         code_dict[code] = msg
     for code_enum in common_codes:
         code, msg = code_enum.value, code_enum.name
         example[int(code)] = {
             "description": msg,
-            "content": {
-                "application/json": {
-                    "example": adapter.error(code, msg)
-                }
-            }
+            "content": {"application/json": {"example": adapter.error(code, msg)}},
         }
         code_dict[code] = msg
-        
+
     if finally_code:
         if isinstance(finally_code, Enum) and finally_code.value not in code_dict:
             code, msg = finally_code.value, finally_code.name
             example[int(code)] = {
                 "description": msg,
-                "content": {
-                    "application/json": {
-                        "example": adapter.error(code, msg)
-                    }
-                }
+                "content": {"application/json": {"example": adapter.error(code, msg)}},
             }
 
             code_dict[code] = msg
-            
-        if isinstance(finally_code, tuple) and f"{api_code}{finally_code[0]}" not in code_dict:
+
+        if (
+            isinstance(finally_code, tuple)
+            and f"{api_code}{finally_code[0]}" not in code_dict
+        ):
             code, msg = finally_code
             code = f"{api_code}{code}"
             example[int(code)] = {
                 "description": msg,
-                "content": {
-                    "application/json": {
-                        "example": adapter.error(code, msg)
-                    }
-                }
+                "content": {"application/json": {"example": adapter.error(code, msg)}},
             }
             code_dict[code] = msg
 
@@ -183,7 +161,7 @@ def generate_responses(
 
 
 def check_app(module: ModuleType):
-    app_name = module.__name__.split('.views.', 1)[0]
+    app_name = module.__name__.split(".views.", 1)[0]
     if app_name not in FAP_INSERTAPPS:
         raise RuntimeError(f"{app_name} app is not in FAP_INSERTAPPS")
     return app_name
@@ -227,7 +205,7 @@ def loader():
                     status_codes=status_codes,
                     common_codes=common_codes,
                     finally_code=finally_code,
-                    response_model=response_model
+                    response_model=response_model,
                 )
                 api_module.View.api_code = api_code
                 api_module.View.code_dict = code_dict
@@ -245,21 +223,27 @@ def loader():
                             "responses": responses,
                         }
                         # 动态添加 API 路由，直接使用子类的 `api` 方法
-                        api_group.add_api_route(endpoint=getattr(view_endpoint, v), **api_cfg, tags=[
-                            gtag] + kwargs.get("tags", []))
+                        api_group.add_api_route(
+                            endpoint=getattr(view_endpoint, v),
+                            **api_cfg,
+                            tags=[gtag] + kwargs.get("tags", []),
+                        )
                 else:
                     # 未配置版本
                     api_cfg = {
-                        "path": pre_url+aurl,
+                        "path": pre_url + aurl,
                         "name": f"{aname}  {api_code}",
                         "response_model": view_endpoint.response_model,
                         "methods": view_endpoint.methods,
                         "operation_id": f"{api_code}_{api_module.__name__}_{uuid.uuid4().hex}",
-                        "responses": responses
+                        "responses": responses,
                     }
                     # 动态添加 API 路由，直接使用子类的 `api` 方法
-                    api_group.add_api_route(endpoint=view_endpoint.api, **api_cfg, tags=[
-                        gtag] + kwargs.get("tags", []))
+                    api_group.add_api_route(
+                        endpoint=view_endpoint.api,
+                        **api_cfg,
+                        tags=[gtag] + kwargs.get("tags", []),
+                    )
 
         app.include_router(router=api_group, prefix=gurl)
 

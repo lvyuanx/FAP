@@ -13,12 +13,12 @@ from typing import Union, Type
 from fastapi import Header, Request, Body, Query, Path, Form, File, UploadFile
 from fastapi.responses import StreamingResponse
 
-from faplus import FAPStatusCodeException, settings, dft_settings
+from faplus import FAPStatusCodeException, get_setting_with_default
 from faplus.schema import ResponseSchema
 from faplus.utils.api_util import Response
 from faplus import StatusCodeEnum
 
-FAP_TOKEN_TAG = getattr(settings, "FAP_TOKEN_TAG", dft_settings.FAP_TOKEN_TAG)
+FAP_TOKEN_TAG = get_setting_with_default("FAP_TOKEN_TAG")
 
 logger = logging.getLogger(__package__)
 

@@ -13,12 +13,12 @@ import logging
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
-from faplus import settings, dft_settings, Response
+from faplus import Response, get_setting_with_default
 from faplus.media import MediaManager
 
 logger = logging.getLogger(__package__)
 
-MEDIA_URL = getattr(settings, "FAP_MEDIA_URL", dft_settings.FAP_MEDIA_URL)
+MEDIA_URL = get_setting_with_default("FAP_MEDIA_URL")
 
 
 class FileDownloadMiddleware(BaseHTTPMiddleware):

@@ -16,9 +16,10 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.padding import PKCS7
 
-from faplus import settings, dft_settings
+from faplus import get_setting_with_default
 
-FAP_AES_KEY = getattr(settings, "FAP_AES_KEY", dft_settings.FAP_AES_KEY)
+FAP_AES_KEY = get_setting_with_default("FAP_AES_KEY")
+
 
 def generate_aes_key(password: str, salt: str = None) -> str:
     """
@@ -36,10 +37,11 @@ def generate_aes_key(password: str, salt: str = None) -> str:
         length=32,  # 256 位密钥
         salt=salt,
         iterations=100000,
-        backend=default_backend()
+        backend=default_backend(),
     )
     key = kdf.derive(password.encode())
     return base64.b64encode(key).decode()
+
 
 def encrypt(plaintext: str, key: str | None) -> str:
     """
@@ -56,13 +58,14 @@ def encrypt(plaintext: str, key: str | None) -> str:
     iv = os.urandom(16)
     padder = PKCS7(algorithms.AES.block_size).padder()
     padded_data = padder.update(plaintext.encode()) + padder.finalize()
-    
+
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
     encryptor = cipher.encryptor()
     encrypted = encryptor.update(padded_data) + encryptor.finalize()
-    
+
     # 返回 base64 编码的加密数据（IV + 加密数据）
     return base64.b64encode(iv + encrypted).decode()
+
 
 def decrypt(encrypted_text: str, key: str | None) -> str:
     """
@@ -79,11 +82,11 @@ def decrypt(encrypted_text: str, key: str | None) -> str:
     encrypted_data = base64.b64decode(encrypted_text)
     iv = encrypted_data[:16]
     encrypted_message = encrypted_data[16:]
-    
+
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
     decryptor = cipher.decryptor()
     decrypted_padded = decryptor.update(encrypted_message) + decryptor.finalize()
-    
+
     unpadder = PKCS7(algorithms.AES.block_size).unpadder()
     decrypted = unpadder.update(decrypted_padded) + unpadder.finalize()
     return decrypted.decode()

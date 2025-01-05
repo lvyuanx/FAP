@@ -15,6 +15,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
 
+FAP_SECRET_KEY = "urTlH17dYxLPE_NhF9ENl-yWIrkA8oHNAMtfLJ1N7pA"
+
 FAP_MEDIA_ROOT = os.path.join(BASE_DIR.parent, "media")
 FAP_MEDIA_URL = "/media"
 
@@ -32,6 +34,7 @@ FAP_MIDDLEWARE_CLASSES = [
 FAP_STARTUP_FUNCS = [
     "faplus.startups.cache_ping_startup.cache_ping_event",  # 缓存ping
     "faplus.startups.tortoise_orm_startup.tortoise_orm_init_event",  # 数据库ORM初始化
+    "faplus.startups.content_type_startup.content_type_register_event",  # 注册模型
     "faplus.startups.run_info_startup.run_info_event",  # 开机信息
 ]  # 开机自启
 
@@ -52,6 +55,7 @@ if DEBUG:
 PROJECT_APP_PACKAGES = ["mail"]  # 项目APP包
 
 FAP_INSERTAPPS = [
+    "faplus",
     "faplus.auth",
     "faplus.media",
 ] + PROJECT_APP_PACKAGES  # 注册的应用 框架app包+项目app包

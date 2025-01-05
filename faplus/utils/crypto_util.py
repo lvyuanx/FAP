@@ -8,10 +8,10 @@ Description: 系统加解密工具
 """
 import importlib
 
-from faplus import settings
+from faplus import get_setting_with_default
 
-ENCRYPT_PWD = getattr(settings, "ENCRYPT_PWD", "faplus.auth.encrypt.md5")
-COYPTO_SECURE_DATA = getattr(settings, "COYPTO_SECURE_DATA", "faplus.auth.encrypt.aes2")
+ENCRYPT_PWD = get_setting_with_default("FAP_ENCRYPT_PWD")
+COYPTO_SECURE_DATA = get_setting_with_default("FAP_COYPTO_SECURE_DATA")
 
 # 密码的加密
 enc_pwd_module = importlib.import_module(ENCRYPT_PWD)
@@ -26,7 +26,7 @@ def secure_encrypt_obj(obj: list | dict, keys: list[str]):
     """加密铭感对象
 
     :param obj: 数组或者字典对象
-    :param keys: 加密字段名称 
+    :param keys: 加密字段名称
     :return: 加密后的数据
     """
     if isinstance(obj, dict):
@@ -49,7 +49,7 @@ def secure_decrypt_obj(obj: dict | list, keys: list[str]) -> dict | list:
     """解密铭感对象
 
     :param obj: 数组或者字典对象
-    :param keys: 加密字段名称 
+    :param keys: 加密字段名称
     :return: 加密后的数据
     """
     if isinstance(obj, dict):
@@ -67,5 +67,5 @@ def secure_decrypt_obj(obj: dict | list, keys: list[str]) -> dict | list:
         return new_list
     else:
         return obj
-    
+
 

@@ -12,11 +12,9 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 from faplus import (
-    settings,
     Response as ApiResponse,
     StatusCodeEnum,
-    dft_settings,
-    const,
+    get_setting_with_default,
 )
 from faplus.utils import token_util
 from faplus.auth.utils import user_util
@@ -25,7 +23,7 @@ from faplus.cache import cache
 
 logger = logging.getLogger(__package__)
 
-FAP_TOKEN_TAG = getattr(settings, "FAP_TOKEN_TAG", dft_settings.FAP_TOKEN_TAG)
+FAP_TOKEN_TAG = get_setting_with_default("FAP_TOKEN_TAG")
 
 
 class JwtMiddleware(BaseHTTPMiddleware):

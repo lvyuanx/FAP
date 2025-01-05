@@ -12,17 +12,17 @@ import logging
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
-from faplus import settings, dft_settings, Response as ApiResponse, const
+from faplus import settings, dft_settings, get_setting_with_default, const
 from faplus.cache import cache
 
 
 logger = logging.getLogger(__package__)
 
-FAP_JWT_WHITES = getattr(settings, "FAP_JWT_WHITES", dft_settings.FAP_JWT_WHITES)
-FAP_LOGIN_URL = getattr(settings, "FAP_LOGIN_URL", dft_settings.FAP_LOGIN_URL)
-FAP_DOCS_URL = getattr(settings, "FAP_DOCS_URL", dft_settings.FAP_DOCS_URL)
-FAP_REDOC_URL = getattr(settings, "FAP_REDOC_URL", dft_settings.FAP_REDOC_URL)
-FAP_OPENAPI_URL = getattr(settings, "FAP_OPENAPI_URL", dft_settings.FAP_OPENAPI_URL)
+FAP_JWT_WHITES = get_setting_with_default("FAP_JWT_WHITES")
+FAP_LOGIN_URL = get_setting_with_default("FAP_LOGIN_URL")
+FAP_DOCS_URL = get_setting_with_default("FAP_DOCS_URL")
+FAP_REDOC_URL = get_setting_with_default("FAP_REDOC_URL")
+FAP_OPENAPI_URL = get_setting_with_default("FAP_OPENAPI_URL")
 
 # 白名单 + 登录地址 + docs地址 + redoc地址 + openapi地址 予以放行
 whitelist = FAP_JWT_WHITES + [

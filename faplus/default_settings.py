@@ -72,10 +72,19 @@ FAP_PUBLICK_KEY = None
 FAP_PRIVATE_KEY = None
 
 # 密码加密
-ENCRYPT_PWD = "faplus.auth.encrypt.md5"
+FAP_ENCRYPT_PWD = "faplus.auth.encrypt.md5"
 
 # 铭感数据加密
-COYPTO_SECURE_DATA = "faplus.auth.encrypt.aes2"
+FAP_COYPTO_SECURE_DATA = "faplus.auth.encrypt.aes2"
+
+# 程序密钥
+FAP_SECRET_KEY = None
+
+# tk加密算法
+FAP_ALGORITHM = "HS256"
+
+# 访问令牌过期时间
+FAP_ACCESS_TOKEN_EXP = 30
 
 # jwt白名单
 FAP_JWT_WHITES = []

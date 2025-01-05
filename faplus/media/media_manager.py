@@ -8,15 +8,15 @@ Description: 媒体管理
 """
 import logging
 import os
-from faplus import settings, dft_settings
+from faplus import get_setting_with_default
 
 from fastapi import UploadFile
 from .utils import file_util
 from .models import FileRecord
 
-BASE_DIR = getattr(settings, "BASE_DIR", dft_settings.BASE_DIR)
-MEDIA_ROOT = getattr(settings, "FAP_MEDIA_ROOT", os.path.join(BASE_DIR, "media"))
-MEDIA_URL = getattr(settings, "FAP_MEDIA_URL", dft_settings.FAP_MEDIA_URL)
+BASE_DIR = get_setting_with_default("BASE_DIR")
+MEDIA_ROOT = get_setting_with_default("FAP_MEDIA_ROOT", os.path.join(BASE_DIR, "media"))
+MEDIA_URL = get_setting_with_default("FAP_MEDIA_URL")
 
 logger = logging.getLogger(__package__)
 

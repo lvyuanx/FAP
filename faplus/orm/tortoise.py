@@ -12,23 +12,23 @@ import logging
 
 from tortoise import Model
 
-from .. import settings, dft_settings
+from .. import settings, dft_settings, get_setting_with_default
 
 logger = logging.getLogger("FAPlus")
 
-USERNAME = getattr(settings, "DB_USERNAME", dft_settings.DB_USERNAME)
-PASSWORD = getattr(settings, "DB_PASSWORD", dft_settings.DB_PASSWORD)
-HOST = getattr(settings, "DB_HOST", dft_settings.DB_HOST)
-PORT = getattr(settings, "DB_PORT", dft_settings.DB_PORT)
-DATABASE = getattr(settings, "DB_DATABASE", dft_settings.DB_DATABASE)
-ENGINE = getattr(settings, "DB_ENGINE", dft_settings.DB_ENGINE)
-CHARSET = getattr(settings, "DB_CHARSET", dft_settings.DB_CHARSET)
-TIMEZONE = getattr(settings, "DB_TIMEZONE", dft_settings.DB_TIMEZONE)
-MAXSIZE = getattr(settings, "DB_MAXSIZE", dft_settings.DB_MAXSIZE)
-MINSIZE = getattr(settings, "DB_MINSIZE", dft_settings.DB_MINSIZE)
-GENERATE_SCHEMAS = getattr(settings, "DB_GENERATE_SCHEMAS", dft_settings.DB_GENERATE_SCHEMAS)
-INSERTAPPS = getattr(settings, "FAP_INSERTAPPS", dft_settings.FAP_INSERTAPPS)
-DEBUG  = getattr(settings, "DEBUG", dft_settings.DEBUG)
+USERNAME = get_setting_with_default("DB_USERNAME")
+PASSWORD = get_setting_with_default("DB_PASSWORD")
+HOST = get_setting_with_default("DB_HOST")
+PORT = get_setting_with_default("DB_PORT")
+DATABASE = get_setting_with_default("DB_DATABASE")
+ENGINE = get_setting_with_default("DB_ENGINE")
+CHARSET = get_setting_with_default("DB_CHARSET")
+TIMEZONE = get_setting_with_default("DB_TIMEZONE")
+MAXSIZE = get_setting_with_default("DB_MAXSIZE")
+MINSIZE = get_setting_with_default("DB_MINSIZE")
+GENERATE_SCHEMAS = get_setting_with_default("DB_GENERATE_SCHEMAS")
+INSERTAPPS = get_setting_with_default("FAP_INSERTAPPS")
+DEBUG = get_setting_with_default("DEBUG")
 
 
 def has_model_subclasses(module):
@@ -36,12 +36,21 @@ def has_model_subclasses(module):
     检查模块中是否有 Model 的子类
     """
     model_subclasses = [
-        cls for _, cls in inspect.getmembers(module, inspect.isclass)
+        cls
+        for _, cls in inspect.getmembers(module, inspect.isclass)
         if issubclass(cls, Model) and cls is not Model
     ]
     return model_subclasses
 
+
 def get_models():
+
+    # 不允许app名称相同
+    apps = []
+    for app in INSERTAPPS:
+        app_name = app.rsplit(".")[-1]
+        if app_name in apps:
+            raise RuntimeError(f"{app_name} app is already in INSERTAPPS")
 
     models = []
     for app in INSERTAPPS:
@@ -57,7 +66,6 @@ def get_models():
 
     return models
 
-    
 
 # Tortoise ORM 配置
 TORTOISE_ORM = {
@@ -73,8 +81,8 @@ TORTOISE_ORM = {
                 "minsize": MINSIZE,
                 "maxsize": MAXSIZE,
                 "charset": CHARSET,
-                "echo": True
-            }
+                "echo": True,
+            },
         }
     },
     "apps": {
@@ -84,5 +92,5 @@ TORTOISE_ORM = {
         }
     },
     "use_tz": False,  # 建议不要开启，不然存储日期时会有很多坑，时区转换在项目中手动处理更稳妥。
-    "timezone": TIMEZONE
+    "timezone": TIMEZONE,
 }

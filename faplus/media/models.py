@@ -19,7 +19,7 @@ class SNRecord(Model):
     sn = fields.CharField(unique=True, max_length=64, description="sn码")
 
     class Meta:
-        table = "sn_record"
+        table = "media_sn_record"
         description = "sn码表"
 
 
@@ -48,7 +48,7 @@ class FileRecord(Model):
     )
 
     class Meta:
-        table = "file_record"
+        table = "media_file_record"
         description = "文件记录表"
 
         indexes = [

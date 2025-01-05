@@ -13,15 +13,15 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.backends import default_backend
 
-from faplus import settings, dft_settings
+from faplus import get_setting_with_default
 
 logger = logging.getLogger("FastApiPlus-RSA")
 
-PUBLICK_KEY = getattr(settings, "FAP_PUBLICK_KEY", dft_settings.FAP_PUBLICK_KEY)
-PRIVATE_KEY = getattr(settings, "FAP_PRIVATE_KEY", dft_settings.FAP_PUBLICK_KEY)
+PUBLICK_KEY = get_setting_with_default("FAP_PUBLICK_KEY")
+PRIVATE_KEY = get_setting_with_default("FAP_PRIVATE_KEY")
 
 def generate_key():
-    
+
     # 生成 RSA 密钥对
     private_key = rsa.generate_private_key(
         public_exponent=65537,
@@ -55,7 +55,7 @@ def generate_key():
 
 # 使用公钥加密数据
 def encrypt(data: str, public_key: str | None = None):
-    if public_key is None: 
+    if public_key is None:
         public_key = PUBLICK_KEY
     pub_key_obj = serialization.load_pem_public_key(public_key.encode())
     encrypted_data = pub_key_obj.encrypt(
@@ -69,11 +69,11 @@ def encrypt(data: str, public_key: str | None = None):
     return  base64.b64encode(encrypted_data).decode('utf-8')
 
 def decrypt(encrypted_data: str, private_key: str | None):
-    if not private_key: 
+    if not private_key:
         private_key = PRIVATE_KEY
     # 加载私钥
     private_key_obj = serialization.load_pem_private_key(private_key.encode(), password=None, backend=default_backend())
-    
+
     # 解密数据
     encrypted_data_bytes = base64.b64decode(encrypted_data)  # 从 base64 解码成字节
     decrypted_data = private_key_obj.decrypt(
@@ -84,5 +84,5 @@ def decrypt(encrypted_data: str, private_key: str | None):
             label=None
         )
     )
-    
+
     return decrypted_data.decode('utf-8')

@@ -12,14 +12,14 @@ import logging
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
-from faplus import settings, dft_settings, Response as ApiResponse, const
+from faplus import get_setting_with_default, const
 from faplus.cache import cache
 
 
 logger = logging.getLogger(__package__)
 
 
-FAP_STATIC_URL = getattr(settings, "FAP_STATIC_URL", dft_settings.FAP_STATIC_URL)
+FAP_STATIC_URL = get_setting_with_default("FAP_STATIC_URL")
 
 
 async def is_static(url: str) -> bool:

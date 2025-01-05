@@ -36,7 +36,7 @@ class FastApiPlusApplication(object):
         """执行命令行参数"""
         command_dict = {
             "runserver": self.runserver,
-            "migrations": self.migrations,
+            "makemigrations": self.makemigrations,
             "init_db": self.init_db,
             "migrate": self.migrate,
             "downgrade": self.downgrade,
@@ -69,8 +69,8 @@ class FastApiPlusApplication(object):
             "--workers", type=int, default=1, help="指定工作进程数"
         )
 
-        # migrations
-        subparsers.add_parser("migrations", help="生成数据库迁移文件")
+        # makemigrations
+        subparsers.add_parser("makemigrations", help="生成数据库迁移文件")
 
         # init db
         subparsers.add_parser("init_db", help="初始化数据库")
@@ -210,14 +210,14 @@ class FastApiPlusApplication(object):
 
         subprocess.run(cmd, shell=True)
 
-    def migrations(self, command_args: argparse.Namespace):
-        self.run_cmd(f"aerich init -t {__package__}.orm.tortoise.TORTOISE_ORM")
+    def makemigrations(self, command_args: argparse.Namespace):
+        self.run_cmd("aerich migrate")
 
     def init_db(self, command_args: argparse.Namespace):
+        self.run_cmd(f"aerich init -t {__package__}.orm.tortoise.TORTOISE_ORM")
         self.run_cmd("aerich init-db")
 
     def migrate(self, command_args: argparse.Namespace):
-        self.run_cmd("aerich migrate")
         self.run_cmd("aerich upgrade")
 
     def downgrade(self, command_args: argparse.Namespace):

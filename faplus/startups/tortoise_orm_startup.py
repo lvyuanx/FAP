@@ -10,11 +10,12 @@ from tortoise import Tortoise
 
 from faplus.orm.tortoise import GENERATE_SCHEMAS, TORTOISE_ORM, ENGINE
 
+
 def tortoise_orm_init_event(**kwargs):
 
     async def do():
         if ENGINE:
-          
+
             # 初始化 Tortoise ORM
             await Tortoise.init(config=TORTOISE_ORM)
 
