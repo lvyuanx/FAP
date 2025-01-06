@@ -8,8 +8,14 @@ Description: FAP配置文件
 """
 import os
 from pathlib import Path
+import config as cfg
 
-DEBUG = True
+def config(key: str, default: str = None):
+    return getattr(cfg, key, default)
+
+
+ENV = "dev"
+DEBUG = config("DEBUG", True)
 APPLICATION_ROOT = "main"
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,7 +26,7 @@ FAP_SECRET_KEY = "urTlH17dYxLPE_NhF9ENl-yWIrkA8oHNAMtfLJ1N7pA"
 FAP_MEDIA_ROOT = os.path.join(BASE_DIR.parent, "media")
 FAP_MEDIA_URL = "/media"
 
-OPEN_VERSION = ["", "/v1"]  # 开启的版本， "": 默认版本
+OPEN_VERSION = [""]  # 开启的版本， "": 默认版本
 
 FAP_MIDDLEWARE_CLASSES = [
     "faplus.middlewares.error_status_code_middleware.ErrorStatusCodeMiddleware",  # 异常码中间件
@@ -124,9 +130,9 @@ SITE_CONFIG = {
 
 # *************DB****************
 DB_ENGINE = "tortoise.backends.mysql"
-DB_DATABASE = "test_fap"
-DB_USERNAME = "root"
-DB_PASSWORD = "root"
+DB_DATABASE = config("DB_DATABASE")
+DB_USERNAME = config("DB_USERNAME")
+DB_PASSWORD = config("DB_PASSWORD")
 
 
 # *************AUTH****************
@@ -142,7 +148,7 @@ FAP_CACHE_CONFIG = {
             "HOST": "127.0.0.1",
             "PORT": 6379,
             "DB": 0,
-            "PASSWORD": "",
+            "PASSWORD": config("REDIS_PASSWORD", ""),
             "MAX_CONNECTIONS": 50,
             "ENCODING": "utf-8",
         },
