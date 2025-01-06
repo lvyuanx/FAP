@@ -12,7 +12,7 @@ import logging
 
 from tortoise import Model
 
-from .. import settings, dft_settings, get_setting_with_default
+from faplus import get_setting_with_default
 
 logger = logging.getLogger("FAPlus")
 
@@ -32,15 +32,11 @@ DEBUG = get_setting_with_default("DEBUG")
 
 
 def has_model_subclasses(module):
-    """
-    检查模块中是否有 Model 的子类
-    """
-    model_subclasses = [
-        cls
-        for _, cls in inspect.getmembers(module, inspect.isclass)
-        if issubclass(cls, Model) and cls is not Model
-    ]
-    return model_subclasses
+    for _, obj in inspect.getmembers(module):
+        # 判断对象是否是类，并且是 Model 的子类
+        if inspect.isclass(obj) and issubclass(obj, Model):
+            return True
+    return False
 
 
 def get_models():
@@ -60,6 +56,7 @@ def get_models():
             if has_model_subclasses(module):
                 models.append(model_str)
         except ModuleNotFoundError:
+            logger.info(f"{app} models not found")
             pass
         except Exception:
             logger.error("Failed to import models from %s" % app, exc_info=True)

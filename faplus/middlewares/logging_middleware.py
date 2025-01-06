@@ -12,7 +12,8 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 import logging
 
-from faplus import StatusCodeEnum, Response as ApiResponse
+from faplus import StatusCodeEnum, get_setting_with_default
+from faplus.utils import app_util
 
 logger = logging.getLogger(__package__)
 
@@ -31,6 +32,9 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         path = request.url.path
         logger.info(f"Request: 【{method}】; content-type:{content_type}; url:{path}")
         try:
+            if get_setting_with_default("DEBUG", True):
+                with app_util.Timer():
+                    return await call_next(request)
             return await call_next(request)
         except Exception as e:
             logger.error("An error occurred during request processing", exc_info=True)

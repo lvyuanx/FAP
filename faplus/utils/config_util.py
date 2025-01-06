@@ -63,12 +63,17 @@ def import_status_code_enum():
 StatusCodeEnum = import_status_code_enum()
 
 
-def get_setting_with_default(cfg_name: str, default: Any = None):
+def get_setting_with_default(cfg_name: str, *args):
     """获取配置项，如果配置项不存在，则返回默认值
     :param cfg_name: 配置项名称
-    :param default: 默认值
+    :param args: 默认值
     :return: 配置项值
     """
-    return getattr(
-        settings, cfg_name, default if default else getattr(dft_settings, cfg_name)
-    )
+    if not args or len(args) < 1:
+        value = getattr(settings, cfg_name, None)
+        if not value:
+            return getattr(dft_settings, cfg_name)
+        else:
+            return value
+
+    return getattr(settings, cfg_name, args[0])

@@ -142,7 +142,7 @@ FAP_CACHE_CONFIG = {
             "HOST": "127.0.0.1",
             "PORT": 6379,
             "DB": 0,
-            "PASSWORD": "root",
+            "PASSWORD": "",
             "MAX_CONNECTIONS": 50,
             "ENCODING": "utf-8",
         },
