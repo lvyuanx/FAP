@@ -33,6 +33,15 @@ class User(Model):
     delete_at = fields.IntField(null=True, description="删除时间")
     updated_at = fields.IntField(null=True, description="更新时间")
 
+    # 多对多
+    groups = fields.ManyToManyField(
+        "models.Group", related_name="users", through="auth_user_group"
+    )
+
+    premissions = fields.ManyToManyField(
+        "models.Premission", related_name="users", through="auth_user_premissions"
+    )
+
     class Meta:
         table = "auth_user"
         indexes = [
@@ -40,3 +49,42 @@ class User(Model):
             Index(fields=["mobile"]),
         ]
         description = "用户表"
+
+    def __str__(self):
+        return f"User(pk={self.id})"
+
+
+class Premission(Model):
+
+    id = fields.IntField(pk=True, description="主键")
+    name = fields.CharField(max_length=255, description="权限名称")
+    content_type = fields.ForeignKeyField(
+        "models.ContentType", related_name="premissions", description="权限类型"
+    )
+    codename = fields.CharField(max_length=100, description="权限代码")
+
+    class Meta:
+        table = "auth_premission"
+        table_description = "权限表"
+
+        unique_together = [("content_type", "codename")]  # 定义唯一约束
+
+    def __str__(self) -> str:
+        return f"Permissions(pk={self.pk}, content_type={self.content_type}, codename={self.codename})"
+
+
+class Group(Model):
+    id = fields.IntField(pk=True, description="主键")
+    name = fields.CharField(max_length=150, unique=True, description="组名")
+
+    premissions = fields.ManyToManyField(
+        "models.Premission", related_name="groupss", through="auth_group_premissions"
+    )
+
+    class Meta:
+
+        table = "auth_group"
+        table_description = "权限组"
+
+    def __str__(self):
+        return f"Group(pk={self.id}, name={self.name})"
