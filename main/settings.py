@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import config as cfg
 
+
 def config(key: str, default: str = None):
     return getattr(cfg, key, default)
 

@@ -1,7 +1,10 @@
+import json
 import logging
 
 from datetime import datetime
-from faplus import FastApiPlusApplication, get_setting_with_default
+import os
+from faplus import get_setting_with_default
+from faplus.utils import time_util
 
 logger = logging.getLogger(__package__)
 
@@ -14,11 +17,11 @@ print_template = (
     + """
 
 FastApi Plus Runserver, Version: {version}, time: {time}
-{cmd_args.host_port}  reload {cmd_args.reload}  workers {cmd_args.workers}
+{host}:{port}  reload {reload}  workers {workers}
 
 推荐使用在线文档进行接口调试
-redocs: http://{cmd_args.host_port}{redoc_url}
-docs: http://{cmd_args.host_port}{docs_url}
+redocs: http://{host}:{port}{redoc_url}
+docs: http://{host}:{port}{docs_url}
 
 """
     + split_line
@@ -32,15 +35,22 @@ def run_info_event(**kwargs):
         if not DEBUG:
             return
 
-        cmd_args = FastApiPlusApplication.cmd_args
+        kwargs_str = os.environ.get("UVICORN_KWARGS")
+        if not kwargs_str:
+            raise Exception("UVICORN_KWARGS not found")
+
+        kwargs = json.loads(kwargs_str)
 
         FAP_REDOC_URL = get_setting_with_default("FAP_REDOC_URL")
         FAP_DOCS_URL = get_setting_with_default("FAP_DOCS_URL")
         FAP_VERSION = get_setting_with_default("FAP_VERSION")
-        time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        time_str = time_util.now_str()
         logger.info(
             print_template.format(
-                cmd_args=cmd_args,
+                host=kwargs["host"],
+                port=kwargs["port"],
+                reload=kwargs["reload"],
+                workers=kwargs["workers"],
                 redoc_url=FAP_REDOC_URL,
                 docs_url=FAP_DOCS_URL,
                 time=time_str,

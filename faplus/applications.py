@@ -25,83 +25,28 @@ logger = logging.getLogger(package)
 class FastApiPlusApplication(object):
 
     app: FastAPI = None
-    cmd_args: argparse.Namespace = None
 
-    def __init__(self) -> None:
+    def __init__(self) -> FastAPI:
         os.environ.setdefault("FAP_PACKAGE", __package__)
-        # 初始化logging
-        self.get_args()
 
-    def execute_command(self, args: argparse.Namespace):
-        """执行命令行参数"""
-        command_dict = {
-            "runserver": self.runserver,
-            "makemigrations": self.makemigrations,
-            "init_db": self.init_db,
-            "migrate": self.migrate,
-            "downgrade": self.downgrade,
-            "history": self.history,
-            "startproject": self.startproject,
-            "startapp": self.startapp,
-        }
+    @property
+    def fastapi_instance(self):
 
-        if args.command in command_dict:
-            command_dict[args.command](args)
-        else:
-            raise RuntimeError("command not found")
+        self.load()
 
-    def get_args(self):
-        """获取命令行参数"""
-        parser = argparse.ArgumentParser(description="FastApiPlus 启动参数")
-        # 创建子解析器，用于管理子命令
-        subparsers = parser.add_subparsers(dest="command", help="子命令")
+        if not self.app:
+            raise RuntimeError("application is None")
 
-        # runserver
-        parser_runserver = subparsers.add_parser("runserver", help="启动服务器")
-        parser_runserver.add_argument(
-            "--host_port",
-            type=str,
-            default="127.0.0.1:8848",
-            help="指定服务器监听的 host 和 port，格式如 127.0.0.1:8000",
-        )
-        parser_runserver.add_argument(
-            "--reload", action="store_true", help="是否开启热加载模式"
-        )
-        parser_runserver.add_argument(
-            "--workers", type=int, default=1, help="指定工作进程数"
-        )
+        # 注册事件
+        self.event_register(self.app)
 
-        # makemigrations
-        subparsers.add_parser("makemigrations", help="生成数据库迁移文件")
+        # 注册中间件
+        self.middleware_register(self.app)
 
-        # init db
-        subparsers.add_parser("init_db", help="初始化数据库")
+        # 注册websocket
+        self.websocket_register(self.app)
 
-        # migrate
-        subparsers.add_parser("migrate", help="执行数据库迁移")
-
-        # history
-        subparsers.add_parser("history", help="查看数据库迁移历史")
-
-        # downgrade
-        parser_downgrade = subparsers.add_parser("downgrade", help="回滚数据库迁移")
-        parser_downgrade.add_argument("--version", type=str, help="回滚版本")
-
-        # 创建初始化项目
-        parser_startproject = subparsers.add_parser("startproject", help="创建项目")
-        parser_startproject.add_argument(
-            "--name", type=str, default="main", help="项目名"
-        )
-
-        # 创建初始化app
-        parser_startapp = subparsers.add_parser("startapp", help="创建app")
-        parser_startapp.add_argument(
-            "--name", type=str, default="main", help="app名"
-        )
-
-        args = parser.parse_args()
-        FastApiPlusApplication.cmd_args = args
-        self.execute_command(args)
+        return self.app
 
     def load(self):
         """系统中的功能使用loader进行加载"""
@@ -113,7 +58,7 @@ class FastApiPlusApplication(object):
         try:
             for loader in loader_lst:
                 loader_module = importlib.import_module(f"{package}.loaders.{loader}")
-                getattr(loader_module, "loader")()
+                self.app = getattr(loader_module, "loader")(self.app)
         except Exception as e:
             logger.error("fast api plus load error", exc_info=True)
             raise e
@@ -190,65 +135,5 @@ class FastApiPlusApplication(object):
             assert ws_cls, f"{ws_cls} is not found"
             app.router.routes.append(ws_cls())
 
-    def runserver(self, command_args: argparse.Namespace):
-        """启动服务器"""
-        # 加载功能模块
-        self.load()
 
-        app = self.app
-        if not app:
-            raise RuntimeError("application is None")
-
-        # 注册事件
-        self.event_register(app)
-
-        # 注册中间件
-        self.middleware_register(app)
-
-        # 注册websocket
-        self.websocket_register(app)
-
-        # 启动服务
-        host, port = command_args.host_port.split(":")
-        uvicorn.run(
-            app,
-            host=host,
-            port=int(port),
-            reload=command_args.reload,
-            workers=command_args.workers,
-            log_level="error",
-        )
-
-    def run_cmd(self, cmd: str):
-        import subprocess
-
-        subprocess.run(cmd, shell=True)
-
-    def makemigrations(self, command_args: argparse.Namespace):
-        self.run_cmd("aerich migrate")
-
-    def init_db(self, command_args: argparse.Namespace):
-        self.run_cmd(f"aerich init -t {__package__}.orm.tortoise.TORTOISE_ORM")
-        self.run_cmd("aerich init-db")
-
-    def migrate(self, command_args: argparse.Namespace):
-        self.run_cmd("aerich upgrade")
-
-    def downgrade(self, command_args: argparse.Namespace):
-        version = command_args.version
-        self.run_cmd(f"aerich downgrade -v {version} -d")
-
-    def history(self, command_args: argparse):
-        self.run_cmd("aerich downgrade --help")
-
-    def startproject(self, command_args: argparse):
-        from faplus.build_application import generate_project
-
-        generate_project.startproject(os.getcwd(), command_args.name)
-
-
-    def startapp(self, command_args: argparse):
-        from faplus.build_application import generate_project
-
-        generate_project.startapp(os.getcwd(), command_args.name)
-
+app: FastAPI = FastApiPlusApplication().fastapi_instance

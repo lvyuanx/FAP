@@ -10,13 +10,13 @@ from enum import Enum
 import importlib
 import logging
 from types import ModuleType
+from typing import Union
 import uuid
 
 from fastapi import FastAPI, APIRouter
 from fastapi.staticfiles import StaticFiles
 from pydantic.main import BaseModel
 from faplus import get_setting_with_default
-from faplus.applications import FastApiPlusApplication
 from faplus.utils import data_util
 from fastapi.openapi.docs import (
     get_redoc_html,
@@ -167,7 +167,7 @@ def check_app(module: ModuleType):
     return app_name
 
 
-def loader():
+def loader(app: Union[FastAPI, None] = None) -> Union[FastAPI, None]:
     api_module = f"{APPLIICATION_ROOT}.apis"
 
     # 加载路由配置
@@ -247,5 +247,4 @@ def loader():
 
         app.include_router(router=api_group, prefix=gurl)
 
-    # 将fastApi注入到FastApiPlusApplication.app中
-    FastApiPlusApplication.app = app
+    return app

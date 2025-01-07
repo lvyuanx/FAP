@@ -8,5 +8,12 @@ Description: 缓存加载器
 """
 
 
-def loader():
+from typing import Union
+
+from fastapi import FastAPI
+
+
+def loader(app: Union[FastAPI, None] = None) -> Union[FastAPI, None]:
     from faplus.cache import cache
+
+    return app
