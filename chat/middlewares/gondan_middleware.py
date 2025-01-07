@@ -11,7 +11,7 @@ import logging
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
-from faplus import settings, Response as ApiResponse, StatusCodeEnum
+from faplus.utils import settings, StatusCodeEnum, Response as ApiResponse
 from faplus.auth.encrypt import aes
 from faplus.auth.models import User
 
@@ -39,10 +39,10 @@ class GondanMiddleware(BaseHTTPMiddleware):
             if not payload or payload != "gongdan":
                 logger.error("token验证失败")
                 return Response(ApiResponse.fail(StatusCodeEnum.用户未登录, StatusCodeEnum.用户未登录.name).json(), headers={"Content-Type": "application/json"})
-        
+
         return await call_next(request)
-        
-            
-            
-            
-        
+
+
+
+
+

@@ -13,7 +13,7 @@ import logging
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
-from faplus import Response, get_setting_with_default
+from faplus.utils import get_setting_with_default, Response
 from faplus.media import MediaManager
 
 logger = logging.getLogger(__package__)

@@ -12,7 +12,7 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 import logging
 
-from faplus import StatusCodeEnum, get_setting_with_default
+from faplus.utils import StatusCodeEnum, get_setting_with_default
 from faplus.utils import app_util
 
 logger = logging.getLogger(__package__)

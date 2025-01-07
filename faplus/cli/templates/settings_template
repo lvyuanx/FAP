@@ -103,8 +103,8 @@ r7JtgsLMVLk+63n0NzbZL7Y=
 
 # *************DB****************
 DB_ENGINE = "tortoise.backends.mysql"
-DB_HOST = config("DB_DATABASE", "localhost")
-DB_PORT = config("DB_DATABASE", 3306)
+DB_HOST = config("DB_HOST", "localhost")
+DB_PORT = config("DB_PORT", 3306)
 DB_DATABASE = config("DB_DATABASE")
 DB_USERNAME = config("DB_USERNAME")
 DB_PASSWORD = config("DB_PASSWORD")
@@ -121,7 +121,7 @@ FAP_CACHE_CONFIG = {
         "PREFIX": "faplus:",
         "OPTIONS": {
             "HOST":  config("REDIS_HOST", "127.0.0.1"),
-            "PORT": config("REDIS_PROT", 3306),
+            "PORT": config("REDIS_PROT", 6379),
             "DB": config("REDIS_DB", 0),
             "PASSWORD": config("REDIS_PASSWORD", ""),
             "MAX_CONNECTIONS": 50,

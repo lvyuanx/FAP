@@ -4,7 +4,7 @@ from os import stat
 from fastapi import Body
 
 from faplus.view import PostView, Response, StatusCodeEnum
-from faplus import settings
+from faplus.utils import settings
 from mail.schemas import SendErrorMailReqSchema
 
 
@@ -29,7 +29,9 @@ class View(PostView):
     ]
 
     @staticmethod
-    async def api(data: SendErrorMailReqSchema = Body(..., description="错误邮件请求的数据"),):
+    async def api(
+        data: SendErrorMailReqSchema = Body(..., description="错误邮件请求的数据"),
+    ):
         """发送错误栈邮件"""
         if data.site_name not in SITE_CONFIG:
             return View.make_code("01", msg_dict={"name": data.site_name})

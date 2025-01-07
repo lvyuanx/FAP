@@ -1,4 +1,4 @@
-from faplus import settings, get_setting_with_default
+from faplus.utils import get_setting_with_default
 
 DEBUG = get_setting_with_default("DEBUG", True)
 FAP_LOGIN_URL = get_setting_with_default("FAP_LOGIN_URL", None)

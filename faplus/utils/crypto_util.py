@@ -8,7 +8,7 @@ Description: 系统加解密工具
 """
 import importlib
 
-from faplus import get_setting_with_default
+from faplus.utils import get_setting_with_default
 
 ENCRYPT_PWD = get_setting_with_default("FAP_ENCRYPT_PWD")
 COYPTO_SECURE_DATA = get_setting_with_default("FAP_COYPTO_SECURE_DATA")
@@ -21,6 +21,7 @@ enc_pwd = getattr(enc_pwd_module, "encrypt")
 crypto_secure_data_module = importlib.import_module(COYPTO_SECURE_DATA)
 secure_encrypt = getattr(crypto_secure_data_module, "encrypt")
 secure_decrypt = getattr(crypto_secure_data_module, "decrypt")
+
 
 def secure_encrypt_obj(obj: list | dict, keys: list[str]):
     """加密铭感对象
@@ -45,6 +46,7 @@ def secure_encrypt_obj(obj: list | dict, keys: list[str]):
 
     return obj
 
+
 def secure_decrypt_obj(obj: dict | list, keys: list[str]) -> dict | list:
     """解密铭感对象
 
@@ -67,5 +69,3 @@ def secure_decrypt_obj(obj: dict | list, keys: list[str]) -> dict | list:
         return new_list
     else:
         return obj
-
-

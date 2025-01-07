@@ -40,8 +40,16 @@ def startproject(root_dir: str, root_app: str):
 
     file_util.copy_file(
         src_dir=template_dir,
-        dst_dir=Path(root_dir).parent,
-        file_names=["config_template"],
+        dst_dir=root_dir,
+        file_names=["config_template", "manage_template"],
+        replace_dict={"manage_template": [("root_app", root_app)]},
+    )
+
+    file_util.copy_file(
+        src_dir=template_dir,
+        dst_dir=root_dir,
+        file_names=["requirements_template"],
+        replace_suffix=".txt",
     )
 
 

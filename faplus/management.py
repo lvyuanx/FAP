@@ -131,13 +131,15 @@ class Management:
 
     def startproject(self):
         """创建项目"""
-        from faplus.build_application import generate_project
+        from faplus.cli import generate_project
 
         generate_project.startproject(os.getcwd(), self.command_args.name)
 
+        self._execute_command("pip install -r requirements.txt")
+
     def startapp(self):
         """创建app"""
-        from faplus.build_application import generate_project
+        from faplus.cli import generate_project
 
         generate_project.startapp(os.getcwd(), self.command_args.name)
 
@@ -146,3 +148,7 @@ class Management:
 
 def execute_from_command_line():
     Management().execute()
+
+
+if __name__ == "__main__":
+    execute_from_command_line()

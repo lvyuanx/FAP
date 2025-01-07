@@ -9,7 +9,7 @@
 """
 import importlib
 
-from faplus import get_setting_with_default
+from faplus.utils import get_setting_with_default
 from tortoise.models import Model
 from faplus.models import ContentType
 

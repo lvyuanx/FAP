@@ -12,7 +12,8 @@ import logging
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
-from faplus import settings, dft_settings, get_setting_with_default, const
+from faplus import const
+from faplus.utils import get_setting_with_default
 from faplus.cache import cache
 
 

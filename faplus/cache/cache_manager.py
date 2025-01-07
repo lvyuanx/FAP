@@ -10,7 +10,7 @@ import importlib
 import logging
 
 from .base_cache import BaseCache, FAP_CACHE_DEFAULT_EXPIRE
-from faplus import settings, dft_settings
+from faplus.utils import settings, dft_settings
 
 logger = logging.getLogger(__package__)
 
@@ -40,7 +40,9 @@ class CacheManager(object):
             raise RuntimeError(f"cache backend {backend} not found")
         return self.cache_obj_dict[backend]
 
-    async def _execute_cache_operation(self, method: str, key: str, *args, backend: str = "default"):
+    async def _execute_cache_operation(
+        self, method: str, key: str, *args, backend: str = "default"
+    ):
         assert key and isinstance(key, str), "key must be a string"
         cache = self.get_backend(backend)
         try:
@@ -49,11 +51,16 @@ class CacheManager(object):
             result = await method_func(f"{prefix}{key}", *args)
             return result
         except Exception:
-            logger.error(
-                f"Error executing cache operation '{method}'", exc_info=True)
+            logger.error(f"Error executing cache operation '{method}'", exc_info=True)
             return None
 
-    async def set(self, key: str, value: str, expire: int = FAP_CACHE_DEFAULT_EXPIRE, backend: str = "default") -> None:
+    async def set(
+        self,
+        key: str,
+        value: str,
+        expire: int = FAP_CACHE_DEFAULT_EXPIRE,
+        backend: str = "default",
+    ) -> None:
         """保存
 
         :param key: 缓存的key
@@ -61,7 +68,11 @@ class CacheManager(object):
         :param expire: 过期时间
         :param nx: nx, defaults to False
         """
-        if not isinstance(key, str) or not isinstance(value, str) or (expire and not isinstance(expire, int)):
+        if (
+            not isinstance(key, str)
+            or not isinstance(value, str)
+            or (expire and not isinstance(expire, int))
+        ):
             raise ValueError("Invalid input types for key, value, or expire")
         await self._execute_cache_operation("set", key, value, expire, backend=backend)
 
@@ -108,8 +119,6 @@ class CacheManager(object):
         return await cache.ping()
 
 
-FAP_CACHE_CONFIG = getattr(
-    settings, "FAP_CACHE_CONFIG", dft_settings.FAP_CACHE_CONFIG
-)
+FAP_CACHE_CONFIG = getattr(settings, "FAP_CACHE_CONFIG", dft_settings.FAP_CACHE_CONFIG)
 
 cache = CacheManager(FAP_CACHE_CONFIG)

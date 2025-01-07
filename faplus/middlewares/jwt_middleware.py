@@ -11,10 +11,10 @@ import logging
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
-from faplus import (
-    Response as ApiResponse,
+from faplus.utils import (
     StatusCodeEnum,
     get_setting_with_default,
+    Response as ApiResponse
 )
 from faplus.utils import token_util
 from faplus.auth.utils import user_util

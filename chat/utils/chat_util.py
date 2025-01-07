@@ -2,13 +2,13 @@ import logging
 from typing import Tuple
 import json
 import aiohttp
-from aiohttp.typedefs import Query
 
 from chat.chat_route import active_connections
-from faplus import settings
+from faplus.utils import settings
 
 
 logger = logging.getLogger(__package__)
+
 
 async def send_all(msg: str | dict):
     """给所有用户发送消息"""
@@ -16,6 +16,7 @@ async def send_all(msg: str | dict):
         msg = json.dumps(msg)
     for conn in active_connections.values():
         await conn.send_text(msg)
+
 
 async def send_to(emails: list[str], msg: str | dict):
     """给指定用户发送消息"""
@@ -38,14 +39,12 @@ async def send_batch(data: list[Tuple[str, str]]):
             msg = json.dumps(msg)
         await conn.send_text(msg)
 
+
 async def authenticate_user(username: str, password: str):
     url = settings.GONDAN_LOGIN
-    data = {
-        "userName": username,
-        "passWord": password
-    }
+    data = {"userName": username, "passWord": password}
     try:
-    
+
         async with aiohttp.ClientSession() as session:
             async with session.post(url, params=data) as response:
                 if response.status == 200:

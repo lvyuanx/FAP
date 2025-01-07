@@ -7,7 +7,7 @@ Date: 2024/11/26 14:33:21
 Description: 缓存基类
 """
 
-from faplus import settings, dft_settings
+from faplus.utils import settings, dft_settings
 
 FAP_CACHE_DEFAULT_EXPIRE = getattr(
     settings, "FAP_CACHE_DEFAULT_EXPIRE", dft_settings.FAP_CACHE_DEFAULT_EXPIRE
@@ -32,7 +32,7 @@ class BaseCache(object):
     async def get(self, key: str, default: str = None) -> str | None:
         """获取缓存"""
         raise NotImplementedError("cache get method must be implemented")
-    
+
     async def get_keys(self, prefix: str) -> list[str]:
         """获取缓存key"""
         raise NotImplementedError("cahce get_keys method must be implemented")
@@ -40,11 +40,11 @@ class BaseCache(object):
     async def delete(self, key: str | list[str]) -> None:
         """删除缓存"""
         raise NotImplementedError("cache delete method must be implemented")
-    
+
     async def clear(self) -> None:
         """清空缓存"""
         raise NotImplementedError("cache clear method must be implemented")
-    
+
     async def ping(self) -> bool:
         """检查缓存是否可用"""
         raise NotImplementedError("cache ping method must be implemented")

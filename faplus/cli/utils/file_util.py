@@ -16,6 +16,7 @@ def copy_file(
     file_names: list[str],
     replace_dict: dict[tuple[str, str]] = None,
     rename_dict: dict = None,
+    replace_suffix: str = ".py",
 ):
 
     keys = replace_dict.keys() if replace_dict else []
@@ -29,7 +30,7 @@ def copy_file(
             target_name = rename_dict[fname]
         else:
             target_name = fname
-        dst_file = os.path.join(dst_dir, target_name[:-9] + ".py")
+        dst_file = os.path.join(dst_dir, target_name[:-9] + replace_suffix)
         with open(src_file, "r", encoding="utf-8") as f:
             content = f.read()
         if replace_dict and fname in keys:

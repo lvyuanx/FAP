@@ -8,14 +8,12 @@ Description: 程序入口
 """
 import os
 import logging
-import argparse
 import importlib
 from typing import Tuple, Union
 from functools import partial
 
-import uvicorn
 from fastapi.applications import FastAPI
-from faplus import settings, dft_settings
+from faplus.utils import settings, dft_settings
 
 
 package = __package__
@@ -123,7 +121,7 @@ class FastApiPlusApplication(object):
                 app.add_middleware(middleware_cls)
 
     def websocket_register(self, app: FastAPI):
-        from . import settings, dft_settings
+        from .utils import settings, dft_settings
 
         websocket_routes: list[str] = getattr(
             settings, "FAP_WS_CLASSES", dft_settings.FAP_WS_CLASSES

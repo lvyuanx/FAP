@@ -1,4 +1,4 @@
-from faplus import settings
+from faplus.utils import settings
 
 apis = {}
 

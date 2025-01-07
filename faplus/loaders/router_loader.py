@@ -16,7 +16,7 @@ import uuid
 from fastapi import FastAPI, APIRouter
 from fastapi.staticfiles import StaticFiles
 from pydantic.main import BaseModel
-from faplus import get_setting_with_default
+from faplus.utils import get_setting_with_default
 from faplus.utils import data_util
 from fastapi.openapi.docs import (
     get_redoc_html,

@@ -8,7 +8,7 @@ Description: 媒体管理
 """
 import logging
 import os
-from faplus import get_setting_with_default
+from faplus.utils import get_setting_with_default
 
 from fastapi import UploadFile
 from .utils import file_util

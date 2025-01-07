@@ -8,7 +8,8 @@ Description: 登录视图
 """
 from fastapi import Body, Request
 
-from faplus import StatusCodeEnum, const
+from faplus import const
+from faplus.utils import StatusCodeEnum
 from faplus.cache import cache
 from faplus.view import PostView
 from faplus.auth import const as auth_const
@@ -21,12 +22,12 @@ class View(PostView):
 
     response_model = LoginResSchema
     finally_code = StatusCodeEnum.登录失败
-    common_codes = [
-        StatusCodeEnum.用户名或密码错误
-    ]
+    common_codes = [StatusCodeEnum.用户名或密码错误]
 
     @staticmethod
-    async def api(request: Request, data: LoginReqSchema = Body(description="登录参数")):
+    async def api(
+        request: Request, data: LoginReqSchema = Body(description="登录参数")
+    ):
         """
         data: LoginReqSchema
         """
@@ -40,7 +41,7 @@ class View(PostView):
         otk = await cache.get(auth_const.USER_TOKEN_CK.format(uid=uid))
         if otk:
             await cache.delete(const.ACTIVATE_TOKEN_CK.format(tk=otk))
-        
+
         # 创建token
         payload = {"uid": uid}
         token = await token_util.create_token(payload)

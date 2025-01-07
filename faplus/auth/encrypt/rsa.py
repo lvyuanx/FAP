@@ -13,32 +13,30 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.backends import default_backend
 
-from faplus import get_setting_with_default
+from faplus.utils import get_setting_with_default
 
 logger = logging.getLogger("FastApiPlus-RSA")
 
 PUBLICK_KEY = get_setting_with_default("FAP_PUBLICK_KEY")
 PRIVATE_KEY = get_setting_with_default("FAP_PRIVATE_KEY")
 
+
 def generate_key():
 
     # 生成 RSA 密钥对
-    private_key = rsa.generate_private_key(
-        public_exponent=65537,
-        key_size=2048
-    )
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
     # 导出公钥和私钥
     private_pem = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption()
+        encryption_algorithm=serialization.NoEncryption(),
     )
 
     public_key = private_key.public_key()
     public_pem = public_key.public_bytes(
         encoding=serialization.Encoding.PEM,
-        format=serialization.PublicFormat.SubjectPublicKeyInfo
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
     )
 
     # 保存公钥和私钥到文件
@@ -52,7 +50,6 @@ def generate_key():
     logger.info("Public Key:", public_pem.decode())
 
 
-
 # 使用公钥加密数据
 def encrypt(data: str, public_key: str | None = None):
     if public_key is None:
@@ -63,16 +60,19 @@ def encrypt(data: str, public_key: str | None = None):
         padding.OAEP(
             mgf=padding.MGF1(algorithm=hashes.SHA256()),
             algorithm=hashes.SHA256(),
-            label=None
-        )
+            label=None,
+        ),
     )
-    return  base64.b64encode(encrypted_data).decode('utf-8')
+    return base64.b64encode(encrypted_data).decode("utf-8")
+
 
 def decrypt(encrypted_data: str, private_key: str | None):
     if not private_key:
         private_key = PRIVATE_KEY
     # 加载私钥
-    private_key_obj = serialization.load_pem_private_key(private_key.encode(), password=None, backend=default_backend())
+    private_key_obj = serialization.load_pem_private_key(
+        private_key.encode(), password=None, backend=default_backend()
+    )
 
     # 解密数据
     encrypted_data_bytes = base64.b64decode(encrypted_data)  # 从 base64 解码成字节
@@ -81,8 +81,8 @@ def decrypt(encrypted_data: str, private_key: str | None):
         padding.OAEP(
             mgf=padding.MGF1(algorithm=hashes.SHA256()),
             algorithm=hashes.SHA256(),
-            label=None
-        )
+            label=None,
+        ),
     )
 
-    return decrypted_data.decode('utf-8')
+    return decrypted_data.decode("utf-8")

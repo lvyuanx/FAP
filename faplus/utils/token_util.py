@@ -12,7 +12,8 @@ from datetime import datetime, timedelta
 
 import jwt  # PyJWT库
 
-from faplus import settings, const, get_setting_with_default
+from faplus import const
+from faplus.utils import get_setting_with_default
 from faplus.cache import cache
 
 

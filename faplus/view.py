@@ -13,10 +13,10 @@ from typing import Union, Type
 from fastapi import Header, Request, Body, Query, Path, Form, File, UploadFile
 from fastapi.responses import StreamingResponse
 
-from faplus import FAPStatusCodeException, get_setting_with_default
+from faplus.exceptions import FAPStatusCodeException
+from faplus.utils import get_setting_with_default, StatusCodeEnum
 from faplus.schema import ResponseSchema
 from faplus.utils.api_util import Response
-from faplus import StatusCodeEnum
 
 FAP_TOKEN_TAG = get_setting_with_default("FAP_TOKEN_TAG")
 

@@ -9,7 +9,7 @@ Description: RSA解密视图
 from fastapi import Query, Request
 
 from faplus.auth.encrypt.rsa import decrypt
-from faplus import StatusCodeEnum
+from faplus.utils import StatusCodeEnum
 from faplus.view import PostView
 
 
@@ -18,6 +18,8 @@ class View(PostView):
     finally_code = StatusCodeEnum.RSA解密失败
 
     @staticmethod
-    async def api(msg: str = Query(..., description="待解密数据"),
-                  private_key: str | None = Query(None, description="私钥")):
+    async def api(
+        msg: str = Query(..., description="待解密数据"),
+        private_key: str | None = Query(None, description="私钥"),
+    ):
         return decrypt(msg, private_key)

@@ -13,12 +13,12 @@ from typing import Union
 
 from tortoise.transactions import in_transaction
 
-from faplus import FAPStatusCodeException, StatusCodeEnum
+from faplus.exceptions import FAPStatusCodeException
 from faplus.auth.models import Group, Premission, User
 from faplus.auth.schemas import UserSchema
 from faplus.auth import const
 from faplus.cache import cache
-from faplus.utils import crypto_util
+from faplus.utils import crypto_util, StatusCodeEnum
 
 
 logger = logging.getLogger(__package__)
