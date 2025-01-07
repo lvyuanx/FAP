@@ -41,6 +41,8 @@ class FastApiPlusApplication(object):
             "migrate": self.migrate,
             "downgrade": self.downgrade,
             "history": self.history,
+            "startproject": self.startproject,
+            "startapp": self.startapp,
         }
 
         if args.command in command_dict:
@@ -84,6 +86,18 @@ class FastApiPlusApplication(object):
         # downgrade
         parser_downgrade = subparsers.add_parser("downgrade", help="回滚数据库迁移")
         parser_downgrade.add_argument("--version", type=str, help="回滚版本")
+
+        # 创建初始化项目
+        parser_startproject = subparsers.add_parser("startproject", help="创建项目")
+        parser_startproject.add_argument(
+            "--name", type=str, default="main", help="项目名"
+        )
+
+        # 创建初始化app
+        parser_startapp = subparsers.add_parser("startapp", help="创建app")
+        parser_startapp.add_argument(
+            "--name", type=str, default="main", help="app名"
+        )
 
         args = parser.parse_args()
         FastApiPlusApplication.cmd_args = args
@@ -226,3 +240,15 @@ class FastApiPlusApplication(object):
 
     def history(self, command_args: argparse):
         self.run_cmd("aerich downgrade --help")
+
+    def startproject(self, command_args: argparse):
+        from faplus.build_application import generate_project
+
+        generate_project.startproject(os.getcwd(), command_args.name)
+
+
+    def startapp(self, command_args: argparse):
+        from faplus.build_application import generate_project
+
+        generate_project.startapp(os.getcwd(), command_args.name)
+
